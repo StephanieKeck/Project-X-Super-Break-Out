@@ -1,0 +1,133 @@
+
+class HoleController
+{
+	field Point _position;
+	field boolean _ballLost;
+
+	field int _radius;
+
+	constructor HoleController new(Point position, int radius)
+	{
+		let _position = position;
+		let _radius = radius;
+
+		return this;
+	}
+
+	method boolean ballLost() { return _ballLost; }
+
+	method void moveTo(Point p)
+	{
+		do _position.updateCoordinatesFromPoint(p);
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		let _ballLost = false;
+
+		do _calculateCollisionWithSelf(ball);
+
+		return;
+	}
+
+	method void _calculateCollisionWithSelf(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var boolean ballWithinBounds;
+		var int distanceToBall;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let ballWithinBounds = _ballWithinBounds(ball);
+
+		if (ballWithinBounds)
+		{
+			let distanceToBall = Point.distanceBetweenPoints(_position, ballPosition);
+
+			if ((distanceToBall - ballRadius) < _radius)
+			{
+				let _ballLost = true;
+			}
+		}
+
+		return;
+	}
+
+	method boolean _ballWithinBounds(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int posX;
+		var int posY;
+		var int ballX;
+		var int ballY;
+
+		var int threshold;
+
+		var int normalized_left_edge;
+		var int normalized_right_edge;
+		var int normalized_top_edge;
+		var int normalized_bottom_edge;
+
+		var boolean withinLeftEdge;
+		var boolean withinRightEdge;
+		var boolean withinTopEdge;
+		var boolean withinBottomEdge;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+		let ballX = ballPosition.getX();
+		let ballY = ballPosition.getY();
+
+		let threshold = -2;
+
+		let normalized_left_edge = posX - _radius - ballRadius - threshold;
+		let normalized_right_edge = posX + _radius + ballRadius + threshold;
+		let normalized_top_edge = posY - _radius - ballRadius - threshold;
+		let normalized_bottom_edge = posY + _radius + ballRadius + threshold;
+
+		let withinLeftEdge = ballX > normalized_left_edge;
+		let withinRightEdge = ballX < normalized_right_edge;
+		let withinTopEdge = ballY > normalized_top_edge;
+		let withinBottomEdge = ballY < normalized_bottom_edge;
+
+		return withinLeftEdge & withinRightEdge & withinTopEdge & withinBottomEdge;
+	}
+
+	method void render()
+	{
+		var int posX;
+		var int posY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		if (posX - _radius < 0) { let posX = _radius + 1; }
+		if (posX + _radius > 511) { let posX = 511 - _radius - 1; }
+		if (posY - _radius < 0) { let posY = _radius + 1; }
+		if (posY + _radius > 255) { let posY = 255 - _radius - 1; }
+
+		do Screen.setColor(true);
+		do Screen.drawCircle(posX, posY, _radius);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do _position.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

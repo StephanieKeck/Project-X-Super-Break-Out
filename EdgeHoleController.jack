@@ -1,0 +1,114 @@
+
+class EdgeHoleController
+{
+	field Point _position;
+	field int _width;
+	field int _height;
+
+	field boolean _ballLost;
+
+	constructor EdgeHoleController new(Point position)
+	{
+		let _position = position;
+		let _width = 3;
+		let _height = 240;
+
+		let _ballLost = false;
+
+		return this;
+	}
+
+	method boolean ballLost() { return _ballLost; }
+
+	method void updateBallPosition(BallController ball)
+	{
+		do _calculateCollisionWithSelf(ball);
+
+		return;
+	}
+
+	method void _calculateCollisionWithSelf(BallController ball)
+	{
+		var int posX;
+		var int posY;
+		var int ballX;
+		var int ballY;
+
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int normalized_left_edge;
+		var int normalized_top_edge;
+		var int normalized_right_edge;
+		var int normalized_bottom_edge;
+
+		var boolean belowTop;
+		var boolean aboveBottom;
+		var boolean belowRight;
+		var boolean aboveLeft;
+
+		var boolean withinXBounds;
+		var boolean withinYBounds;
+		var boolean withinBounds;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let ballPosition = ball.getPosition();
+		let ballX = ballPosition.getX();
+		let ballY = ballPosition.getY();
+
+		let ballRadius = ball.getRadius();
+
+		let normalized_left_edge = posX - ballRadius;
+		let normalized_top_edge = posY - ballRadius;
+		let normalized_right_edge = posX + _width + ballRadius;
+		let normalized_bottom_edge = posY + _height + ballRadius;
+
+		let belowTop = ballY > normalized_top_edge;
+		let aboveBottom = ballY < normalized_bottom_edge;
+		let belowRight = ballX < normalized_right_edge;
+		let aboveLeft = ballX > normalized_left_edge;
+
+		let withinXBounds = belowRight & aboveLeft;
+		let withinYBounds = belowTop & aboveBottom;
+		let withinBounds = withinXBounds & withinYBounds;
+
+		let _ballLost = withinBounds;
+
+		return;
+	}
+
+	method void render()
+	{
+		var int posX;
+		var int posY;
+
+		var int endX;
+		var int endY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let endX = posX + _width;
+		let endY = posY + _height;
+
+		if (posX < 0) { let posX = 0; }
+		if (endX > 511) { let endX = 511; }
+		if (posY < 0) { let posY = 0; }
+		if (endY > 255) { let endY = 255; }
+
+		do Screen.setColor(true);
+		do Screen.drawRectangle(posX, posY, endX, endY);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do _position.dispose();
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

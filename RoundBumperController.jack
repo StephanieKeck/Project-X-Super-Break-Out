@@ -1,0 +1,165 @@
+
+class RoundBumperController
+{
+	field Point _position;
+	field boolean _ballCollision;
+	field int _collisionVector;
+
+	field int _radius;
+
+	field Array _collisionPoints;
+	field int _collisionPointsCount;
+
+	constructor RoundBumperController new(Point position, int radius, Array collisionPoints, int collisionPointsCount)
+	{
+		let _position = position;
+		let _radius = radius;
+		let _collisionPoints = collisionPoints;
+		let _collisionPointsCount = collisionPointsCount;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+
+		return this;
+	}
+
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+
+	method void moveTo(Point p)
+	{
+		do _position.updateCoordinatesFromPoint(p);
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		let _ballCollision = false;
+
+		do _calculateCollisionWithSelf(ball);
+
+		return;
+	}
+
+	method void _calculateCollisionWithSelf(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var boolean ballWithinBounds;
+
+		var int distanceToBall;
+
+		var CollisionPoint cPoint;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let ballWithinBounds = _ballWithinBounds(ball);
+
+		if (ballWithinBounds)
+		{
+			let distanceToBall = Point.distanceBetweenPoints(_position, ballPosition);
+
+			if ((distanceToBall - ballRadius) < _radius)
+			{
+				let _ballCollision = true;
+
+				let cPoint = CollisionPoint.getClosestCollisionPoint(ballPosition, _position, _collisionPoints, _collisionPointsCount);
+
+				let _collisionVector = cPoint.getVector();
+			}
+		}
+
+		return;
+	}
+
+	method boolean _ballWithinBounds(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int posX;
+		var int posY;
+		var int ballX;
+		var int ballY;
+
+		var int threshold;
+
+		var int normalized_left_edge;
+		var int normalized_right_edge;
+		var int normalized_top_edge;
+		var int normalized_bottom_edge;
+
+		var boolean withinLeftEdge;
+		var boolean withinRightEdge;
+		var boolean withinTopEdge;
+		var boolean withinBottomEdge;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+		let ballX = ballPosition.getX();
+		let ballY = ballPosition.getY();
+
+		let threshold = 2;
+
+		let normalized_left_edge = posX - _radius - ballRadius - threshold;
+		let normalized_right_edge = posX + _radius + ballRadius + threshold;
+		let normalized_top_edge = posY - _radius - ballRadius - threshold;
+		let normalized_bottom_edge = posY + _radius + ballRadius + threshold;
+
+		let withinLeftEdge = ballX > normalized_left_edge;
+		let withinRightEdge = ballX < normalized_right_edge;
+		let withinTopEdge = ballY > normalized_top_edge;
+		let withinBottomEdge = ballY < normalized_bottom_edge;
+
+		return withinLeftEdge & withinRightEdge & withinTopEdge & withinBottomEdge;
+	}
+
+	method void render()
+	{
+		var int posX;
+		var int posY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		if (posX - _radius < 0) { let posX = _radius + 1; }
+		if (posX + _radius > 511) { let posX = 511 - _radius - 1; }
+		if (posY - _radius < 0) { let posY = _radius + 1; }
+		if (posY + _radius > 255) { let posY = 255 - _radius - 1; }
+
+		do Screen.setColor(true);
+		do Screen.drawCircle(posX, posY, _radius);
+		do Screen.setColor(false);
+		do Screen.drawCircle(posX, posY, (_radius - 1));
+
+		return;
+	}
+
+	method void dispose()
+	{
+		var CollisionPoint cPoint;
+		var int index;
+
+		do _position.dispose();
+
+		let index = 0;
+		while (index < _collisionPointsCount)
+		{
+			let cPoint = _collisionPoints[index];
+			do cPoint.dispose();
+			let index = index + 1;
+		}
+
+		do _collisionPoints.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+
+}

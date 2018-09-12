@@ -1,0 +1,732 @@
+
+
+class FieldController 
+{
+	field int _level;
+	field int _ballsRemaining;
+	field int _points;
+	field boolean _gameEnded;
+	field boolean _gameWon;
+	field int _cyclesSinceBallLost;
+
+	field LevelController _levelController;
+
+	constructor FieldController new()
+	{
+		let _level = 0;
+
+		let _ballsRemaining = 3;
+		let _points = 0;
+		let _gameEnded = false;
+		let _gameWon = false;
+		let _cyclesSinceBallLost = 0;
+
+		do _initializeLevel();
+
+		return this;
+	}
+
+	method boolean gameEnded() { return _gameEnded; }
+	method boolean gameWon() { return _gameWon; }
+	method int getPoints() { return _points; }
+
+	method void update()
+	{
+		var boolean ballLost;
+		var int blocksRemaining;
+		var boolean levelEnded;
+
+		var boolean ballWithinStatsArea;
+
+		let ballWithinStatsArea = _levelController.ballWithinStatsArea();
+		if (ballWithinStatsArea) { do StatsUIController.clear(); }
+
+		//do StatsUIController.clear();
+
+		let levelEnded = false;
+		let _cyclesSinceBallLost = _cyclesSinceBallLost + 1;
+
+		// Update level controller and retrieve relevant stats
+		do _levelController.update();
+
+		let ballLost = _levelController.ballLost();
+		let _points = _points + _levelController.getPoints();
+		let blocksRemaining = _levelController.getBlocksRemaining();
+
+		// Check win/lose conditions:
+
+		// If all balls are lost, game is lost
+		if (ballLost & (_cyclesSinceBallLost > 4)) 
+		{ 
+			let _ballsRemaining = _ballsRemaining - 1; 
+			let _cyclesSinceBallLost = 0;
+
+			if (_ballsRemaining = 0) 
+			{ 
+				let _gameEnded = true; 
+				let _gameWon = false;
+			}
+		}
+
+		// If all blocks gone, level is ended
+		if (blocksRemaining = 0) { let levelEnded = true; }
+
+		// If all levels completed, game is won
+		if (levelEnded) 
+		{ 
+			do _levelController.clear();
+
+			let _level = _level + 1; 
+
+			if (_level > 2)
+			{
+				let _gameEnded = true;
+				let _gameWon = true;
+			}
+			else
+			{
+				let _ballsRemaining = 3;
+				do _levelController.dispose();
+				do _initializeLevel();
+				do _levelController.render();
+			}
+		}
+
+		do StatsUIController.render(_level + 1, _points, _ballsRemaining);
+
+		return;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		do _levelController.updateKeyBoardInput(key);
+
+		return;
+	}
+
+	method void render()
+	{
+		do _levelController.render();
+		do StatsUIController.render(_level + 1, _points, _ballsRemaining);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do _levelController.dispose();
+
+		do Memory.deAlloc(this);
+		
+		return;
+	}
+
+	method void _initializeLevel()
+	{
+		var SectorsController sectorsController;
+
+		var Point defaultBallPosition;
+		var int startVector;
+
+		var GameItemController sectorOneGameItem;
+		var GameItemController sectorTwoGameItem;
+		var GameItemController sectorThreeGameItem;
+		var GameItemController sectorFourGameItem;
+		var GameItemController sectorFiveGameItem;
+		var GameItemController sectorSixGameItem;
+		var GameItemController sectorSevenGameItem;
+		var GameItemController sectorEightGameItem;
+		var GameItemController sectorNineGameItem;
+
+		var Array sectors;
+
+		var Array sectorOneActiveBlocks;
+		var Array sectorTwoActiveBlocks;
+		var Array sectorThreeActiveBlocks;
+		var Array sectorFourActiveBlocks;
+		var Array sectorFiveActiveBlocks;
+		var Array sectorSixActiveBlocks;
+		var Array sectorSevenActiveBlocks;
+		var Array sectorEightActiveBlocks;
+		var Array sectorNineActiveBlocks;
+
+		if (_level = 0)
+		{
+			let defaultBallPosition = Point.new(256,94);
+			let startVector = 30;
+
+			let sectorOneGameItem = GameItemController.new(Point.new(96,46), 3, 1);
+			let sectorTwoGameItem = GameItemController.new(Point.new(255,46), 3, 0);
+			let sectorThreeGameItem = GameItemController.new(Point.new(436,46), 1, 0);
+			let sectorFourGameItem = GameItemController.new(Point.new(0,0), 0, 0);
+			let sectorFiveGameItem = GameItemController.new(Point.new(255,127), 2, 0);
+			let sectorSixGameItem = GameItemController.new(Point.new(0,0), 0, 0);
+			let sectorSevenGameItem = GameItemController.new(Point.new(76,226), 1, 0);
+			let sectorEightGameItem = GameItemController.new(Point.new(255,216), 1, 1);
+			let sectorNineGameItem = GameItemController.new(Point.new(416,216), 3, 1);
+
+			let sectorOneActiveBlocks = Array.new(16);
+
+			let sectorOneActiveBlocks[0] = false;
+			let sectorOneActiveBlocks[1] = false;
+			let sectorOneActiveBlocks[2] = false;
+			let sectorOneActiveBlocks[3] = true;
+			let sectorOneActiveBlocks[4] = false;
+			let sectorOneActiveBlocks[5] = false;
+			let sectorOneActiveBlocks[6] = false;
+			let sectorOneActiveBlocks[7] = true;
+			let sectorOneActiveBlocks[8] = false;
+			let sectorOneActiveBlocks[9] = false;
+			let sectorOneActiveBlocks[10] = false;
+			let sectorOneActiveBlocks[11] = true;
+			let sectorOneActiveBlocks[12] = false;
+			let sectorOneActiveBlocks[13] = true;
+			let sectorOneActiveBlocks[14] = true;
+			let sectorOneActiveBlocks[15] = false;
+
+			let sectorTwoActiveBlocks = Array.new(16);
+
+			let sectorTwoActiveBlocks[0] = true;
+			let sectorTwoActiveBlocks[1] = false;
+			let sectorTwoActiveBlocks[2] = false;
+			let sectorTwoActiveBlocks[3] = true;
+			let sectorTwoActiveBlocks[4] = true;
+			let sectorTwoActiveBlocks[5] = false;
+			let sectorTwoActiveBlocks[6] = false;
+			let sectorTwoActiveBlocks[7] = true;
+			let sectorTwoActiveBlocks[8] = true;
+			let sectorTwoActiveBlocks[9] = false;
+			let sectorTwoActiveBlocks[10] = false;
+			let sectorTwoActiveBlocks[11] = true;
+			let sectorTwoActiveBlocks[12] = false;
+			let sectorTwoActiveBlocks[13] = false;
+			let sectorTwoActiveBlocks[14] = false;
+			let sectorTwoActiveBlocks[15] = false;
+
+			let sectorThreeActiveBlocks = Array.new(16);
+
+			let sectorThreeActiveBlocks[0] = true;
+			let sectorThreeActiveBlocks[1] = false;
+			let sectorThreeActiveBlocks[2] = false;
+			let sectorThreeActiveBlocks[3] = false;
+			let sectorThreeActiveBlocks[4] = true;
+			let sectorThreeActiveBlocks[5] = false;
+			let sectorThreeActiveBlocks[6] = false;
+			let sectorThreeActiveBlocks[7] = false;
+			let sectorThreeActiveBlocks[8] = true;
+			let sectorThreeActiveBlocks[9] = false;
+			let sectorThreeActiveBlocks[10] = false;
+			let sectorThreeActiveBlocks[11] = false;
+			let sectorThreeActiveBlocks[12] = false;
+			let sectorThreeActiveBlocks[13] = true;
+			let sectorThreeActiveBlocks[14] = true;
+			let sectorThreeActiveBlocks[15] = false;
+
+			let sectorFourActiveBlocks = Array.new(16);
+
+			let sectorFourActiveBlocks[0] = false;
+			let sectorFourActiveBlocks[1] = true;
+			let sectorFourActiveBlocks[2] = true;
+			let sectorFourActiveBlocks[3] = false;
+			let sectorFourActiveBlocks[4] = false;
+			let sectorFourActiveBlocks[5] = true;
+			let sectorFourActiveBlocks[6] = true;
+			let sectorFourActiveBlocks[7] = false;
+			let sectorFourActiveBlocks[8] = false;
+			let sectorFourActiveBlocks[9] = true;
+			let sectorFourActiveBlocks[10] = true;
+			let sectorFourActiveBlocks[11] = false;
+			let sectorFourActiveBlocks[12] = false;
+			let sectorFourActiveBlocks[13] = true;
+			let sectorFourActiveBlocks[14] = true;
+			let sectorFourActiveBlocks[15] = false;
+
+			let sectorFiveActiveBlocks = Array.new(16);
+
+			let sectorFiveActiveBlocks[0] = false;
+			let sectorFiveActiveBlocks[1] = false;
+			let sectorFiveActiveBlocks[2] = false;
+			let sectorFiveActiveBlocks[3] = false;
+			let sectorFiveActiveBlocks[4] = false;
+			let sectorFiveActiveBlocks[5] = false;
+			let sectorFiveActiveBlocks[6] = false;
+			let sectorFiveActiveBlocks[7] = false;
+			let sectorFiveActiveBlocks[8] = false;
+			let sectorFiveActiveBlocks[9] = false;
+			let sectorFiveActiveBlocks[10] = false;
+			let sectorFiveActiveBlocks[11] = false;
+			let sectorFiveActiveBlocks[12] = false;
+			let sectorFiveActiveBlocks[13] = false;
+			let sectorFiveActiveBlocks[14] = false;
+			let sectorFiveActiveBlocks[15] = false;
+
+			let sectorSixActiveBlocks = Array.new(16);
+
+			let sectorSixActiveBlocks[0] = false;
+			let sectorSixActiveBlocks[1] = true;
+			let sectorSixActiveBlocks[2] = true;
+			let sectorSixActiveBlocks[3] = false;
+			let sectorSixActiveBlocks[4] = false;
+			let sectorSixActiveBlocks[5] = true;
+			let sectorSixActiveBlocks[6] = true;
+			let sectorSixActiveBlocks[7] = false;
+			let sectorSixActiveBlocks[8] = false;
+			let sectorSixActiveBlocks[9] = true;
+			let sectorSixActiveBlocks[10] = true;
+			let sectorSixActiveBlocks[11] = false;
+			let sectorSixActiveBlocks[12] = false;
+			let sectorSixActiveBlocks[13] = true;
+			let sectorSixActiveBlocks[14] = true;
+			let sectorSixActiveBlocks[15] = false;
+
+			let sectorSevenActiveBlocks = Array.new(16);
+
+			let sectorSevenActiveBlocks[0] = false;
+			let sectorSevenActiveBlocks[1] = true;
+			let sectorSevenActiveBlocks[2] = true;
+			let sectorSevenActiveBlocks[3] = false;
+			let sectorSevenActiveBlocks[4] = false;
+			let sectorSevenActiveBlocks[5] = false;
+			let sectorSevenActiveBlocks[6] = false;
+			let sectorSevenActiveBlocks[7] = true;
+			let sectorSevenActiveBlocks[8] = false;
+			let sectorSevenActiveBlocks[9] = false;
+			let sectorSevenActiveBlocks[10] = false;
+			let sectorSevenActiveBlocks[11] = true;
+			let sectorSevenActiveBlocks[12] = false;
+			let sectorSevenActiveBlocks[13] = false;
+			let sectorSevenActiveBlocks[14] = false;
+			let sectorSevenActiveBlocks[15] = true;
+
+			let sectorEightActiveBlocks = Array.new(16);
+
+			let sectorEightActiveBlocks[0] = false;
+			let sectorEightActiveBlocks[1] = false;
+			let sectorEightActiveBlocks[2] = false;
+			let sectorEightActiveBlocks[3] = false;
+			let sectorEightActiveBlocks[4] = true;
+			let sectorEightActiveBlocks[5] = false;
+			let sectorEightActiveBlocks[6] = false;
+			let sectorEightActiveBlocks[7] = true;
+			let sectorEightActiveBlocks[8] = true;
+			let sectorEightActiveBlocks[9] = false;
+			let sectorEightActiveBlocks[10] = false;
+			let sectorEightActiveBlocks[11] = true;
+			let sectorEightActiveBlocks[12] = true;
+			let sectorEightActiveBlocks[13] = false;
+			let sectorEightActiveBlocks[14] = false;
+			let sectorEightActiveBlocks[15] = true;
+
+			let sectorNineActiveBlocks = Array.new(16);
+
+			let sectorNineActiveBlocks[0] = false;
+			let sectorNineActiveBlocks[1] = true;
+			let sectorNineActiveBlocks[2] = true;
+			let sectorNineActiveBlocks[3] = false;
+			let sectorNineActiveBlocks[4] = true;
+			let sectorNineActiveBlocks[5] = false;
+			let sectorNineActiveBlocks[6] = false;
+			let sectorNineActiveBlocks[7] = false;
+			let sectorNineActiveBlocks[8] = true;
+			let sectorNineActiveBlocks[9] = false;
+			let sectorNineActiveBlocks[10] = false;
+			let sectorNineActiveBlocks[11] = false;
+			let sectorNineActiveBlocks[12] = true;
+			let sectorNineActiveBlocks[13] = false;
+			let sectorNineActiveBlocks[14] = false;
+			let sectorNineActiveBlocks[15] = false;
+		}
+
+		if (_level = 1)
+		{
+			let defaultBallPosition = Point.new(256,94);
+			let startVector = 16;
+
+			let sectorOneGameItem = GameItemController.new(Point.new(0,0), 0, 0);
+			let sectorTwoGameItem = GameItemController.new(Point.new(216,56), 1, 1);
+			let sectorThreeGameItem = GameItemController.new(Point.new(436,56), 4, 0);
+			let sectorFourGameItem = GameItemController.new(Point.new(96,136), 3, 0);
+			let sectorFiveGameItem = GameItemController.new(Point.new(255,127), 2, 0);
+			let sectorSixGameItem = GameItemController.new(Point.new(416,136), 3, 1);
+			let sectorSevenGameItem = GameItemController.new(Point.new(76,216), 4, 0);
+			let sectorEightGameItem = GameItemController.new(Point.new(296,216), 1, 1);
+			let sectorNineGameItem = GameItemController.new(Point.new(0,0), 0, 0);
+
+			let sectorOneActiveBlocks = Array.new(16);
+
+			let sectorOneActiveBlocks[0] = false;
+			let sectorOneActiveBlocks[1] = true;
+			let sectorOneActiveBlocks[2] = true;
+			let sectorOneActiveBlocks[3] = true;
+			let sectorOneActiveBlocks[4] = false;
+			let sectorOneActiveBlocks[5] = true;
+			let sectorOneActiveBlocks[6] = true;
+			let sectorOneActiveBlocks[7] = true;
+			let sectorOneActiveBlocks[8] = false;
+			let sectorOneActiveBlocks[9] = true;
+			let sectorOneActiveBlocks[10] = true;
+			let sectorOneActiveBlocks[11] = true;
+			let sectorOneActiveBlocks[12] = false;
+			let sectorOneActiveBlocks[13] = true;
+			let sectorOneActiveBlocks[14] = true;
+			let sectorOneActiveBlocks[15] = false;
+
+			let sectorTwoActiveBlocks = Array.new(16);
+
+			let sectorTwoActiveBlocks[0] = false;
+			let sectorTwoActiveBlocks[1] = false;
+			let sectorTwoActiveBlocks[2] = true;
+			let sectorTwoActiveBlocks[3] = true;
+			let sectorTwoActiveBlocks[4] = false;
+			let sectorTwoActiveBlocks[5] = false;
+			let sectorTwoActiveBlocks[6] = true;
+			let sectorTwoActiveBlocks[7] = true;
+			let sectorTwoActiveBlocks[8] = false;
+			let sectorTwoActiveBlocks[9] = false;
+			let sectorTwoActiveBlocks[10] = true;
+			let sectorTwoActiveBlocks[11] = true;
+			let sectorTwoActiveBlocks[12] = false;
+			let sectorTwoActiveBlocks[13] = false;
+			let sectorTwoActiveBlocks[14] = false;
+			let sectorTwoActiveBlocks[15] = false;
+
+			let sectorThreeActiveBlocks = Array.new(16);
+
+			let sectorThreeActiveBlocks[0] = true;
+			let sectorThreeActiveBlocks[1] = false;
+			let sectorThreeActiveBlocks[2] = false;
+			let sectorThreeActiveBlocks[3] = false;
+			let sectorThreeActiveBlocks[4] = true;
+			let sectorThreeActiveBlocks[5] = false;
+			let sectorThreeActiveBlocks[6] = false;
+			let sectorThreeActiveBlocks[7] = false;
+			let sectorThreeActiveBlocks[8] = true;
+			let sectorThreeActiveBlocks[9] = false;
+			let sectorThreeActiveBlocks[10] = false;
+			let sectorThreeActiveBlocks[11] = false;
+			let sectorThreeActiveBlocks[12] = false;
+			let sectorThreeActiveBlocks[13] = false;
+			let sectorThreeActiveBlocks[14] = false;
+			let sectorThreeActiveBlocks[15] = false;
+
+			let sectorFourActiveBlocks = Array.new(16);
+
+			let sectorFourActiveBlocks[0] = false;
+			let sectorFourActiveBlocks[1] = true;
+			let sectorFourActiveBlocks[2] = true;
+			let sectorFourActiveBlocks[3] = false;
+			let sectorFourActiveBlocks[4] = false;
+			let sectorFourActiveBlocks[5] = false;
+			let sectorFourActiveBlocks[6] = false;
+			let sectorFourActiveBlocks[7] = false;
+			let sectorFourActiveBlocks[8] = false;
+			let sectorFourActiveBlocks[9] = false;
+			let sectorFourActiveBlocks[10] = false;
+			let sectorFourActiveBlocks[11] = false;
+			let sectorFourActiveBlocks[12] = false;
+			let sectorFourActiveBlocks[13] = true;
+			let sectorFourActiveBlocks[14] = true;
+			let sectorFourActiveBlocks[15] = false;
+
+			let sectorFiveActiveBlocks = Array.new(16);
+
+			let sectorFiveActiveBlocks[0] = false;
+			let sectorFiveActiveBlocks[1] = false;
+			let sectorFiveActiveBlocks[2] = false;
+			let sectorFiveActiveBlocks[3] = false;
+			let sectorFiveActiveBlocks[4] = false;
+			let sectorFiveActiveBlocks[5] = false;
+			let sectorFiveActiveBlocks[6] = false;
+			let sectorFiveActiveBlocks[7] = false;
+			let sectorFiveActiveBlocks[8] = false;
+			let sectorFiveActiveBlocks[9] = false;
+			let sectorFiveActiveBlocks[10] = false;
+			let sectorFiveActiveBlocks[11] = false;
+			let sectorFiveActiveBlocks[12] = false;
+			let sectorFiveActiveBlocks[13] = false;
+			let sectorFiveActiveBlocks[14] = false;
+			let sectorFiveActiveBlocks[15] = false;
+
+			let sectorSixActiveBlocks = Array.new(16);
+
+			let sectorSixActiveBlocks[0] = false;
+			let sectorSixActiveBlocks[1] = true;
+			let sectorSixActiveBlocks[2] = true;
+			let sectorSixActiveBlocks[3] = false;
+			let sectorSixActiveBlocks[4] = false;
+			let sectorSixActiveBlocks[5] = false;
+			let sectorSixActiveBlocks[6] = false;
+			let sectorSixActiveBlocks[7] = false;
+			let sectorSixActiveBlocks[8] = false;
+			let sectorSixActiveBlocks[9] = false;
+			let sectorSixActiveBlocks[10] = false;
+			let sectorSixActiveBlocks[11] = false;
+			let sectorSixActiveBlocks[12] = false;
+			let sectorSixActiveBlocks[13] = true;
+			let sectorSixActiveBlocks[14] = true;
+			let sectorSixActiveBlocks[15] = false;
+
+			let sectorSevenActiveBlocks = Array.new(16);
+
+			let sectorSevenActiveBlocks[0] = false;
+			let sectorSevenActiveBlocks[1] = false;
+			let sectorSevenActiveBlocks[2] = false;
+			let sectorSevenActiveBlocks[3] = false;
+			let sectorSevenActiveBlocks[4] = false;
+			let sectorSevenActiveBlocks[5] = false;
+			let sectorSevenActiveBlocks[6] = false;
+			let sectorSevenActiveBlocks[7] = true;
+			let sectorSevenActiveBlocks[8] = false;
+			let sectorSevenActiveBlocks[9] = false;
+			let sectorSevenActiveBlocks[10] = false;
+			let sectorSevenActiveBlocks[11] = true;
+			let sectorSevenActiveBlocks[12] = false;
+			let sectorSevenActiveBlocks[13] = false;
+			let sectorSevenActiveBlocks[14] = false;
+			let sectorSevenActiveBlocks[15] = true;
+
+			let sectorEightActiveBlocks = Array.new(16);
+
+			let sectorEightActiveBlocks[0] = false;
+			let sectorEightActiveBlocks[1] = false;
+			let sectorEightActiveBlocks[2] = false;
+			let sectorEightActiveBlocks[3] = false;
+			let sectorEightActiveBlocks[4] = true;
+			let sectorEightActiveBlocks[5] = true;
+			let sectorEightActiveBlocks[6] = false;
+			let sectorEightActiveBlocks[7] = false;
+			let sectorEightActiveBlocks[8] = true;
+			let sectorEightActiveBlocks[9] = true;
+			let sectorEightActiveBlocks[10] = false;
+			let sectorEightActiveBlocks[11] = false;
+			let sectorEightActiveBlocks[12] = true;
+			let sectorEightActiveBlocks[13] = true;
+			let sectorEightActiveBlocks[14] = false;
+			let sectorEightActiveBlocks[15] = false;
+
+			let sectorNineActiveBlocks = Array.new(16);
+
+			let sectorNineActiveBlocks[0] = false;
+			let sectorNineActiveBlocks[1] = true;
+			let sectorNineActiveBlocks[2] = true;
+			let sectorNineActiveBlocks[3] = false;
+			let sectorNineActiveBlocks[4] = true;
+			let sectorNineActiveBlocks[5] = true;
+			let sectorNineActiveBlocks[6] = true;
+			let sectorNineActiveBlocks[7] = false;
+			let sectorNineActiveBlocks[8] = true;
+			let sectorNineActiveBlocks[9] = true;
+			let sectorNineActiveBlocks[10] = true;
+			let sectorNineActiveBlocks[11] = false;
+			let sectorNineActiveBlocks[12] = true;
+			let sectorNineActiveBlocks[13] = true;
+			let sectorNineActiveBlocks[14] = true;
+			let sectorNineActiveBlocks[15] = false;
+		}
+
+		if (_level = 2)
+		{
+			let defaultBallPosition = Point.new(256,94);
+			let startVector = 48;
+
+			let sectorOneGameItem = GameItemController.new(Point.new(96,76), 3, 1);
+			let sectorTwoGameItem = GameItemController.new(Point.new(256,56), 1, 1);
+			let sectorThreeGameItem = GameItemController.new(Point.new(436,56), 4, 0);
+			let sectorFourGameItem = GameItemController.new(Point.new(0,0), 0, 0);
+			let sectorFiveGameItem = GameItemController.new(Point.new(255,127), 2, 1);
+			let sectorSixGameItem = GameItemController.new(Point.new(0,0), 0, 0);
+			let sectorSevenGameItem = GameItemController.new(Point.new(76,216), 4, 0);
+			let sectorEightGameItem = GameItemController.new(Point.new(256,216), 1, 2);
+			let sectorNineGameItem = GameItemController.new(Point.new(416,196), 3, 0);
+
+			let sectorOneActiveBlocks = Array.new(16);
+
+			let sectorOneActiveBlocks[0] = false;
+			let sectorOneActiveBlocks[1] = true;
+			let sectorOneActiveBlocks[2] = true;
+			let sectorOneActiveBlocks[3] = true;
+			let sectorOneActiveBlocks[4] = false;
+			let sectorOneActiveBlocks[5] = true;
+			let sectorOneActiveBlocks[6] = true;
+			let sectorOneActiveBlocks[7] = true;
+			let sectorOneActiveBlocks[8] = false;
+			let sectorOneActiveBlocks[9] = false;
+			let sectorOneActiveBlocks[10] = false;
+			let sectorOneActiveBlocks[11] = true;
+			let sectorOneActiveBlocks[12] = false;
+			let sectorOneActiveBlocks[13] = false;
+			let sectorOneActiveBlocks[14] = false;
+			let sectorOneActiveBlocks[15] = false;
+
+			let sectorTwoActiveBlocks = Array.new(16);
+
+			let sectorTwoActiveBlocks[0] = true;
+			let sectorTwoActiveBlocks[1] = false;
+			let sectorTwoActiveBlocks[2] = false;
+			let sectorTwoActiveBlocks[3] = true;
+			let sectorTwoActiveBlocks[4] = true;
+			let sectorTwoActiveBlocks[5] = false;
+			let sectorTwoActiveBlocks[6] = false;
+			let sectorTwoActiveBlocks[7] = true;
+			let sectorTwoActiveBlocks[8] = true;
+			let sectorTwoActiveBlocks[9] = false;
+			let sectorTwoActiveBlocks[10] = false;
+			let sectorTwoActiveBlocks[11] = true;
+			let sectorTwoActiveBlocks[12] = false;
+			let sectorTwoActiveBlocks[13] = false;
+			let sectorTwoActiveBlocks[14] = false;
+			let sectorTwoActiveBlocks[15] = false;
+
+			let sectorThreeActiveBlocks = Array.new(16);
+
+			let sectorThreeActiveBlocks[0] = true;
+			let sectorThreeActiveBlocks[1] = false;
+			let sectorThreeActiveBlocks[2] = false;
+			let sectorThreeActiveBlocks[3] = false;
+			let sectorThreeActiveBlocks[4] = true;
+			let sectorThreeActiveBlocks[5] = false;
+			let sectorThreeActiveBlocks[6] = false;
+			let sectorThreeActiveBlocks[7] = false;
+			let sectorThreeActiveBlocks[8] = true;
+			let sectorThreeActiveBlocks[9] = false;
+			let sectorThreeActiveBlocks[10] = false;
+			let sectorThreeActiveBlocks[11] = false;
+			let sectorThreeActiveBlocks[12] = false;
+			let sectorThreeActiveBlocks[13] = false;
+			let sectorThreeActiveBlocks[14] = false;
+			let sectorThreeActiveBlocks[15] = false;
+
+			let sectorFourActiveBlocks = Array.new(16);
+
+			let sectorFourActiveBlocks[0] = false;
+			let sectorFourActiveBlocks[1] = true;
+			let sectorFourActiveBlocks[2] = true;
+			let sectorFourActiveBlocks[3] = false;
+			let sectorFourActiveBlocks[4] = false;
+			let sectorFourActiveBlocks[5] = true;
+			let sectorFourActiveBlocks[6] = true;
+			let sectorFourActiveBlocks[7] = false;
+			let sectorFourActiveBlocks[8] = false;
+			let sectorFourActiveBlocks[9] = true;
+			let sectorFourActiveBlocks[10] = true;
+			let sectorFourActiveBlocks[11] = false;
+			let sectorFourActiveBlocks[12] = false;
+			let sectorFourActiveBlocks[13] = true;
+			let sectorFourActiveBlocks[14] = true;
+			let sectorFourActiveBlocks[15] = false;
+
+			let sectorFiveActiveBlocks = Array.new(16);
+
+			let sectorFiveActiveBlocks[0] = false;
+			let sectorFiveActiveBlocks[1] = false;
+			let sectorFiveActiveBlocks[2] = false;
+			let sectorFiveActiveBlocks[3] = false;
+			let sectorFiveActiveBlocks[4] = false;
+			let sectorFiveActiveBlocks[5] = false;
+			let sectorFiveActiveBlocks[6] = false;
+			let sectorFiveActiveBlocks[7] = false;
+			let sectorFiveActiveBlocks[8] = false;
+			let sectorFiveActiveBlocks[9] = false;
+			let sectorFiveActiveBlocks[10] = false;
+			let sectorFiveActiveBlocks[11] = false;
+			let sectorFiveActiveBlocks[12] = false;
+			let sectorFiveActiveBlocks[13] = false;
+			let sectorFiveActiveBlocks[14] = false;
+			let sectorFiveActiveBlocks[15] = false;
+
+			let sectorSixActiveBlocks = Array.new(16);
+
+			let sectorSixActiveBlocks[0] = false;
+			let sectorSixActiveBlocks[1] = true;
+			let sectorSixActiveBlocks[2] = true;
+			let sectorSixActiveBlocks[3] = false;
+			let sectorSixActiveBlocks[4] = false;
+			let sectorSixActiveBlocks[5] = true;
+			let sectorSixActiveBlocks[6] = true;
+			let sectorSixActiveBlocks[7] = false;
+			let sectorSixActiveBlocks[8] = false;
+			let sectorSixActiveBlocks[9] = true;
+			let sectorSixActiveBlocks[10] = true;
+			let sectorSixActiveBlocks[11] = false;
+			let sectorSixActiveBlocks[12] = false;
+			let sectorSixActiveBlocks[13] = true;
+			let sectorSixActiveBlocks[14] = true;
+			let sectorSixActiveBlocks[15] = false;
+
+			let sectorSevenActiveBlocks = Array.new(16);
+
+			let sectorSevenActiveBlocks[0] = false;
+			let sectorSevenActiveBlocks[1] = false;
+			let sectorSevenActiveBlocks[2] = false;
+			let sectorSevenActiveBlocks[3] = false;
+			let sectorSevenActiveBlocks[4] = false;
+			let sectorSevenActiveBlocks[5] = false;
+			let sectorSevenActiveBlocks[6] = false;
+			let sectorSevenActiveBlocks[7] = true;
+			let sectorSevenActiveBlocks[8] = false;
+			let sectorSevenActiveBlocks[9] = false;
+			let sectorSevenActiveBlocks[10] = false;
+			let sectorSevenActiveBlocks[11] = true;
+			let sectorSevenActiveBlocks[12] = false;
+			let sectorSevenActiveBlocks[13] = false;
+			let sectorSevenActiveBlocks[14] = false;
+			let sectorSevenActiveBlocks[15] = true;
+
+			let sectorEightActiveBlocks = Array.new(16);
+
+			let sectorEightActiveBlocks[0] = false;
+			let sectorEightActiveBlocks[1] = false;
+			let sectorEightActiveBlocks[2] = false;
+			let sectorEightActiveBlocks[3] = false;
+			let sectorEightActiveBlocks[4] = true;
+			let sectorEightActiveBlocks[5] = false;
+			let sectorEightActiveBlocks[6] = false;
+			let sectorEightActiveBlocks[7] = true;
+			let sectorEightActiveBlocks[8] = true;
+			let sectorEightActiveBlocks[9] = false;
+			let sectorEightActiveBlocks[10] = false;
+			let sectorEightActiveBlocks[11] = true;
+			let sectorEightActiveBlocks[12] = true;
+			let sectorEightActiveBlocks[13] = false;
+			let sectorEightActiveBlocks[14] = false;
+			let sectorEightActiveBlocks[15] = true;
+
+			let sectorNineActiveBlocks = Array.new(16);
+
+			let sectorNineActiveBlocks[0] = false;
+			let sectorNineActiveBlocks[1] = false;
+			let sectorNineActiveBlocks[2] = false;
+			let sectorNineActiveBlocks[3] = false;
+			let sectorNineActiveBlocks[4] = true;
+			let sectorNineActiveBlocks[5] = false;
+			let sectorNineActiveBlocks[6] = false;
+			let sectorNineActiveBlocks[7] = false;
+			let sectorNineActiveBlocks[8] = true;
+			let sectorNineActiveBlocks[9] = true;
+			let sectorNineActiveBlocks[10] = true;
+			let sectorNineActiveBlocks[11] = false;
+			let sectorNineActiveBlocks[12] = true;
+			let sectorNineActiveBlocks[13] = true;
+			let sectorNineActiveBlocks[14] = true;
+			let sectorNineActiveBlocks[15] = false;
+		}
+
+		let sectors = Array.new(9);
+
+		let sectors[0] = ConfigurableSectorController.new(Point.new(16,16), sectorOneActiveBlocks, sectorOneGameItem);
+		let sectors[1] = ConfigurableSectorController.new(Point.new(176,16), sectorTwoActiveBlocks, sectorTwoGameItem);
+		let sectors[2] = ConfigurableSectorController.new(Point.new(336,16), sectorThreeActiveBlocks, sectorThreeGameItem);
+		let sectors[3] = ConfigurableSectorController.new(Point.new(16,96), sectorFourActiveBlocks, sectorFourGameItem);
+		let sectors[4] = ConfigurableSectorController.new(Point.new(176,96), sectorFiveActiveBlocks, sectorFiveGameItem);
+		let sectors[5] = ConfigurableSectorController.new(Point.new(336,96), sectorSixActiveBlocks, sectorSixGameItem);
+		let sectors[6] = ConfigurableSectorController.new(Point.new(16,176), sectorSevenActiveBlocks, sectorSevenGameItem);
+		let sectors[7] = ConfigurableSectorController.new(Point.new(176,176), sectorEightActiveBlocks, sectorEightGameItem);
+		let sectors[8] = ConfigurableSectorController.new(Point.new(336,176), sectorNineActiveBlocks, sectorNineGameItem);
+
+		let sectorsController = SectorsController.new(Point.new(0,0), sectors);
+
+		let _levelController = LevelController.new(sectorsController, defaultBallPosition, startVector);
+
+		return;
+	}
+}

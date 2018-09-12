@@ -1,0 +1,225 @@
+
+class BoundaryController
+{
+	field Point _position;
+	field int _width;
+	field int _height;
+
+	field boolean _ballLost;
+	field boolean _ballCollision;
+	field int _collisionVector;
+
+	field VerticalRoundedPaddleController _verticalPaddleOne;
+	field VerticalRoundedPaddleController _verticalPaddleTwo;
+	field EdgeHoleController _edgeHoleOne;
+	field EdgeHoleController _edgeHoleTwo;
+
+	constructor BoundaryController new(Point position)
+	{
+		var int posX;
+		var int posY;
+
+		var int paddleYCoordinate;
+		var int paddleOneXCoordinate;
+		var int paddleTwoXCoordinate;
+
+		let _position = position;
+		let _width = 512;
+		let _height = 240;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let paddleYCoordinate = posY + 200;
+		let paddleOneXCoordinate = posX + 6;
+		let paddleTwoXCoordinate = posX + _width - 6;
+
+		let _ballLost = false;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+
+		let _verticalPaddleOne = VerticalRoundedPaddleController.new(Point.new(6, 88), true);
+		let _verticalPaddleTwo = VerticalRoundedPaddleController.new(Point.new(505, 88), false);
+
+		let _edgeHoleOne = EdgeHoleController.new(Point.new(0, 16));
+		let _edgeHoleTwo = EdgeHoleController.new(Point.new(508, 16));
+
+		return this;
+	}
+
+	method boolean ballLost() { return _ballLost; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+
+	method void updateBallPosition(BallController ball)
+	{
+		let _ballLost = false;
+		let _ballCollision = false;
+
+		do _edgeHoleOne.updateBallPosition(ball);
+
+		let _ballLost = _edgeHoleOne.ballLost();
+		if (~_ballLost) 
+		{ 
+			do _edgeHoleTwo.updateBallPosition(ball);
+
+			let _ballLost = _edgeHoleTwo.ballLost(); 
+		}
+
+		if (~_ballLost)
+		{
+			do _calculateCollisionWithSelf(ball);
+
+			if (~_ballCollision)
+			{ 
+				do _verticalPaddleOne.updateBallPosition(ball);
+
+				let _ballCollision = _verticalPaddleOne.ballCollision();
+				if (_ballCollision) { let _collisionVector = _verticalPaddleOne.getCollisionVector(); }
+				else
+				{
+					do _verticalPaddleTwo.updateBallPosition(ball);
+
+					let _ballCollision = _verticalPaddleTwo.ballCollision();
+					if (_ballCollision) { let _collisionVector = _verticalPaddleTwo.getCollisionVector(); }
+				}
+			}
+		}
+
+		return;
+	}
+
+	method void _calculateCollisionWithSelf(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int ballY;
+		var int thisY;
+		var int normalized_top_edge;
+		var int normalized_bottom_edge;
+
+		var boolean withinYBounds;
+		var boolean collisionWithTop;
+		var boolean collisionWithBottom;
+
+		let ballRadius = ball.getRadius();
+		let ballPosition = ball.getPosition();
+
+		let ballY = ballPosition.getY();
+		let thisY = _position.getY();
+
+		let normalized_top_edge = thisY + ballRadius;
+		let normalized_bottom_edge = thisY + _height - ballRadius;
+
+		let collisionWithTop = ballY < normalized_top_edge;
+		let collisionWithBottom = ballY > normalized_bottom_edge;
+
+		let withinYBounds = ~(collisionWithBottom | collisionWithTop);
+
+		let _ballCollision = false;
+
+		if (~withinYBounds)
+		{
+			let _ballCollision = true;
+
+			if (collisionWithTop)
+			{
+				let _collisionVector = CollisionPoint.getDownwardVector();
+			}
+
+			if (collisionWithBottom)
+			{
+				let _collisionVector = CollisionPoint.getUpwardVector();
+			}
+		}
+
+		return;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		var int posX;
+		var int posY;
+		var int paddleUpperEdge;
+		var int paddleLowerEdge;
+		var int thisUpperEdge;
+		var int thisLowerEdge;
+
+		var int paddleStep;
+		var int normalizedUpperEdge;
+		var int normalizedLowerEdge;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let paddleUpperEdge = _verticalPaddleOne.getUpperEdge();
+		let paddleLowerEdge = _verticalPaddleOne.getLowerEdge();
+		let thisUpperEdge = posY;
+		let thisLowerEdge = posY + _height;
+
+		let paddleStep = _verticalPaddleOne.getStepAmount();
+		let normalizedUpperEdge = thisUpperEdge + paddleStep;
+		let normalizedLowerEdge = thisLowerEdge - paddleStep;
+
+		if ((key = 131) & (paddleUpperEdge > normalizedUpperEdge)) {
+			do clear();
+			do _verticalPaddleOne.moveUp();
+			do _verticalPaddleTwo.moveUp();
+			do render();
+		}
+		if ((key = 133) & (paddleLowerEdge < normalizedLowerEdge)) {
+			do clear();
+			do _verticalPaddleOne.moveDown();
+			do _verticalPaddleTwo.moveDown();
+			do render();
+		}
+
+		return;
+	}
+
+	method boolean ballInBoundary(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+		var int ballX;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+		let ballX = ballPosition.getX();
+
+		return ((ballX - ballRadius) < 17) | ((ballX + ballRadius) > 494);
+	}
+
+	method void clear()
+	{
+		do Screen.setColor(false);
+		do Screen.drawRectangle(0,16,16,255);
+		do Screen.drawRectangle(495,16,511,255);
+
+		return;
+	}
+
+	method void render()
+	{
+		do _edgeHoleOne.render();
+		do _edgeHoleTwo.render();
+		do _verticalPaddleOne.render();
+		do _verticalPaddleTwo.render();
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do _position.dispose();
+		do _verticalPaddleOne.dispose();
+		do _verticalPaddleTwo.dispose();
+		do _edgeHoleOne.dispose();
+		do _edgeHoleTwo.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

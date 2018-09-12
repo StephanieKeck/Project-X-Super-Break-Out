@@ -1,0 +1,267 @@
+
+class LargeTrackedBumberController
+{
+	field Point _position;
+
+	field boolean _ballLost;
+	field boolean _ballCollision;
+	field int _collisionVector;
+	field int _currentPoints;
+
+	field int _variant;
+
+	field Array _trackPoints;
+	field Array _trackPointsCount;
+	field int _trackPointsIndex;
+
+	field RoundBumperController _roundBumperController;
+	field RotatingPaddleAndHoleController _rotatingPaddleAndHoleController;
+
+	constructor LargeTrackedBumberController new(Point position, int variant)
+	{
+		var Point bumperPosition;
+
+		var Array collisionPoints;
+		var int collisionPointsCount;
+
+		var int posX;
+		var int posY;
+
+		let _position = position;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let _variant = variant;
+
+		let _ballLost = false;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+		let _currentPoints = 0;
+
+		let _trackPointsCount = 31;
+		let _trackPointsIndex = 15;
+
+		let _trackPoints = Array.new(_trackPointsCount);
+
+		let _trackPoints[0] = Point.new(posX - 60, posY);
+		let _trackPoints[1] = Point.new(posX - 56, posY);
+		let _trackPoints[2] = Point.new(posX - 52, posY);
+		let _trackPoints[3] = Point.new(posX - 48, posY);
+		let _trackPoints[4] = Point.new(posX - 44, posY);
+		let _trackPoints[5] = Point.new(posX - 40, posY);
+		let _trackPoints[6] = Point.new(posX - 36, posY);
+		let _trackPoints[7] = Point.new(posX - 32, posY);
+		let _trackPoints[8] = Point.new(posX - 28, posY);
+		let _trackPoints[9] = Point.new(posX - 24, posY);
+		let _trackPoints[10] = Point.new(posX - 20, posY);
+		let _trackPoints[11] = Point.new(posX - 16, posY);
+		let _trackPoints[12] = Point.new(posX - 12, posY);
+		let _trackPoints[13] = Point.new(posX - 8, posY);
+		let _trackPoints[14] = Point.new(posX - 4, posY);
+		let _trackPoints[15] = Point.new(posX, posY);
+		let _trackPoints[16] = Point.new(posX + 4, posY);
+		let _trackPoints[17] = Point.new(posX + 8, posY);
+		let _trackPoints[18] = Point.new(posX + 12, posY);
+		let _trackPoints[19] = Point.new(posX + 16, posY);
+		let _trackPoints[20] = Point.new(posX + 20, posY);
+		let _trackPoints[21] = Point.new(posX + 24, posY);
+		let _trackPoints[22] = Point.new(posX + 28, posY);
+		let _trackPoints[23] = Point.new(posX + 32, posY);
+		let _trackPoints[24] = Point.new(posX + 36, posY);
+		let _trackPoints[25] = Point.new(posX + 40, posY);
+		let _trackPoints[26] = Point.new(posX + 44, posY);
+		let _trackPoints[27] = Point.new(posX + 48, posY);
+		let _trackPoints[28] = Point.new(posX + 52, posY);
+		let _trackPoints[29] = Point.new(posX + 56, posY);
+		let _trackPoints[30] = Point.new(posX + 60, posY);
+
+		if (_variant = 0)
+		{
+			let collisionPointsCount = 32;
+			let collisionPoints = Array.new(collisionPointsCount);
+
+			let collisionPoints[0] = CollisionPoint.new(25,0,0);
+			let collisionPoints[1] = CollisionPoint.new(25,-5,4);
+			let collisionPoints[2] = CollisionPoint.new(23,-10,8);
+			let collisionPoints[3] = CollisionPoint.new(21,-14,12);
+			let collisionPoints[4] = CollisionPoint.new(18,-18,16);
+			let collisionPoints[5] = CollisionPoint.new(14,-21,20);
+			let collisionPoints[6] = CollisionPoint.new(10,-23,24);
+			let collisionPoints[7] = CollisionPoint.new(5,-25,28);
+			let collisionPoints[8] = CollisionPoint.new(0,-25,32);
+			let collisionPoints[9] = CollisionPoint.new(-5,-25,36);
+			let collisionPoints[10] = CollisionPoint.new(-10,-23,40);
+			let collisionPoints[11] = CollisionPoint.new(-14,-21,44);
+			let collisionPoints[12] = CollisionPoint.new(-18,-18,48);
+			let collisionPoints[13] = CollisionPoint.new(-21,-14,52);
+			let collisionPoints[14] = CollisionPoint.new(-23,-10,56);
+			let collisionPoints[15] = CollisionPoint.new(-25,-5,60);
+			let collisionPoints[16] = CollisionPoint.new(-25,0,64);
+			let collisionPoints[17] = CollisionPoint.new(-25,5,68);
+			let collisionPoints[18] = CollisionPoint.new(-23,10,72);
+			let collisionPoints[19] = CollisionPoint.new(-21,14,76);
+			let collisionPoints[20] = CollisionPoint.new(-18,18,80);
+			let collisionPoints[21] = CollisionPoint.new(-14,21,84);
+			let collisionPoints[22] = CollisionPoint.new(-10,23,88);
+			let collisionPoints[23] = CollisionPoint.new(-5,25,92);
+			let collisionPoints[24] = CollisionPoint.new(0,25,96);
+			let collisionPoints[25] = CollisionPoint.new(5,25,100);
+			let collisionPoints[26] = CollisionPoint.new(10,23,104);
+			let collisionPoints[27] = CollisionPoint.new(14,21,108);
+			let collisionPoints[28] = CollisionPoint.new(18,18,112);
+			let collisionPoints[29] = CollisionPoint.new(21,14,116);
+			let collisionPoints[30] = CollisionPoint.new(23,10,120);
+			let collisionPoints[31] = CollisionPoint.new(25,5,124);
+		}
+		
+		let bumperPosition = Point.new(0,0);
+		do bumperPosition.updateCoordinatesFromPoint(_trackPoints[_trackPointsIndex]);
+
+		if (_variant = 0)
+		{
+			let _roundBumperController = RoundBumperController.new(bumperPosition, 25, collisionPoints, collisionPointsCount);
+		}
+
+		if (_variant = 1)
+		{
+			let _rotatingPaddleAndHoleController = RotatingPaddleAndHoleController.new(bumperPosition, 0);
+		}
+
+		return this;
+	}
+
+	method boolean ballLost() { return _ballLost; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+	method int getPoints() { return _currentPoints; }
+
+	method void update()
+	{
+		let _currentPoints = 0;
+
+		if (_ballCollision) { let _currentPoints = 10; }
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		if (_variant = 0)
+		{
+			let _ballLost = false;
+
+			do _roundBumperController.updateBallPosition(ball);
+
+			let _ballCollision = _roundBumperController.ballCollision();
+
+			if (_ballCollision) { let _collisionVector = _roundBumperController.getCollisionVector(); }
+		}
+		
+		if (_variant = 1)
+		{
+			do _rotatingPaddleAndHoleController.updateBallPosition(ball);
+
+			let _ballLost = _rotatingPaddleAndHoleController.ballLost();
+
+			if (~_ballLost)
+			{
+				let _ballCollision = _rotatingPaddleAndHoleController.ballCollision();
+
+				if (_ballCollision) { let _collisionVector = _rotatingPaddleAndHoleController.getCollisionVector(); }
+			}
+		}
+
+		return;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		var boolean changePosition;
+		var Point newPosition;
+
+		if ((key = 130) & (_trackPointsIndex > 0))
+		{
+			let _trackPointsIndex = _trackPointsIndex - 1;
+			let changePosition = true;
+		}
+		if ((key = 132) & (_trackPointsIndex < (_trackPointsCount - 1)))
+		{
+			let _trackPointsIndex = _trackPointsIndex + 1;
+			let changePosition = true;
+		}
+
+		if (changePosition)
+		{
+			let newPosition = _trackPoints[_trackPointsIndex];
+
+			if (_variant = 0)
+			{
+				do _roundBumperController.moveTo(newPosition);
+			}
+
+			if (_variant = 1)
+			{
+				do _rotatingPaddleAndHoleController.moveTo(newPosition);
+
+				do _rotatingPaddleAndHoleController.updateKeyBoardInput(key);
+			}
+		}
+
+		return;
+	}
+
+	method void render()
+	{
+		do _renderTrack();
+
+		if (_variant = 0) { do _roundBumperController.render(); }
+		if (_variant = 1) { do _rotatingPaddleAndHoleController.render(); }
+
+		return;
+	}
+
+	method void _renderTrack()
+	{
+		var int posX;
+		var int posY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		do Screen.setColor(true);
+		do Screen.drawRectangle(posX - 60, posY - 2, posX + 60, posY + 2);
+		do Screen.setColor(false);
+		do Screen.drawPixel(posX - 60, posY - 2);
+		do Screen.drawPixel(posX + 60, posY - 2);
+		do Screen.drawPixel(posX - 60, posY + 2);
+		do Screen.drawPixel(posX + 60, posY + 2);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		var Point p;
+		var int index;
+
+		do _position.dispose();
+
+		let index = 0;
+		while (index < _trackPointsCount)
+		{
+			let p = _trackPoints[index];
+			do p.dispose();
+			let index = index + 1;
+		}
+
+		do _trackPoints.dispose();
+
+		if (_variant = 0) { do _roundBumperController.dispose(); }
+		if (_variant = 1) {do _rotatingPaddleAndHoleController.dispose(); }
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

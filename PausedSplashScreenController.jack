@@ -1,0 +1,22 @@
+
+class PausedSplashScreenController
+{
+	function void render()
+	{
+		var String pausedText;
+		var String continueText;
+
+		let pausedText = "The game is paused.";
+		let continueText = "Press any key to continue.";
+
+		do Output.moveCursor(8, 22);
+		do Output.printString(pausedText);
+		do Output.moveCursor(12, 19);
+		do Output.printString(continueText);
+
+		do pausedText.dispose();
+		do continueText.dispose();
+
+		return;
+	}
+}

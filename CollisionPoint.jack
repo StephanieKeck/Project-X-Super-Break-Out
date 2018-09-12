@@ -1,0 +1,113 @@
+
+class CollisionPoint
+{
+	field Point _p;
+	field int _normal;
+
+	function CollisionPoint getClosestCollisionPoint(Point reference, Point offset, Array cPoints, int size)
+	{
+		var CollisionPoint cPoint;
+		var int index;
+
+		var int refX;
+		var int refY;
+		var int offsetX;
+		var int offsetY;
+		var int cx;
+		var int cy;
+
+		var int distance;
+		var int smallestDistance;
+		var int smallestIndex;
+
+		let refX = reference.getX();
+		let refY = reference.getY();
+		let offsetX = offset.getX();
+		let offsetY = offset.getY();
+
+		let smallestDistance = 30000;
+		let index = 0;
+
+		while (index < size)
+		{
+			let cPoint = cPoints[index];
+			let cx = cPoint.getX();
+			let cy = cPoint.getY();
+
+			let distance = Point.distanceBetweenPointsByCoordinates(refX, refY, cx  + offsetX, cy + offsetY);
+
+			if (distance < smallestDistance)
+			{
+				let smallestDistance = distance;
+				let smallestIndex = index;
+			}
+
+			let index = index + 1;
+		}
+
+		return cPoints[smallestIndex];
+	}
+
+	function int reflectVector(int vector, int normal)
+	{
+		var int angleBetweenVectors;
+		var int reflection;
+
+		let angleBetweenVectors = Math.abs(normal - vector);
+
+		if (angleBetweenVectors > 64) { let angleBetweenVectors = 128 - angleBetweenVectors; }
+
+		if (normal > vector) { let reflection = normal + angleBetweenVectors; }
+		if (normal < vector) { let reflection = normal - angleBetweenVectors; }
+		if ((normal < 33) & (vector > 95)) { let reflection = normal + angleBetweenVectors; }
+		if ((normal > 95) & (vector < 33)) { let reflection = normal - angleBetweenVectors; }
+
+		return CollisionPoint.normalizeVector(reflection);
+	}
+
+	function int flipVector(int vector)
+	{
+		return CollisionPoint.normalizeVector(vector + 64);
+	}
+
+	function int getUpwardVector() { return 32; }
+	function int getDownwardVector() { return 96; }
+	function int getLeftwardVector() { return 64; }
+	function int getRightwardVector() { return 0; }
+
+	function int normalizeVector(int vector)
+	{
+		while (vector < 0)
+		{
+			let vector = vector + 128;
+		}
+
+		while (vector > 127)
+		{
+			let vector = vector - 128;
+		}
+
+		return vector;
+	}
+
+	constructor CollisionPoint new(int x, int y, int normal)
+	{
+		let _p = Point.new(x,y);
+		let _normal = normal;
+
+		return this;
+	}
+
+	method int getX() { return _p.getX(); }
+	method int getY() { return _p.getY(); }
+	method int getVector() { return _normal; }
+	method Point getPosition() { return _p; }
+
+	method void dispose()
+	{
+		do _p.dispose();
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

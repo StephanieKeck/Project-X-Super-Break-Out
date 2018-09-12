@@ -1,0 +1,62 @@
+
+class InstructionsSplashScreenController
+{
+	function void render()
+	{
+		var String instructionsText1;
+		var String instructionsText2;
+		var String instructionsText3;
+		var String instructionsText4;
+		var String instructionsText5;
+		var String instructionsText6;
+		var String instructionsText7;
+		var String instructionsText8;
+		var String instructionsText9;
+		var String continueText;
+
+		let instructionsText1 = "Eliminate all blocks.";
+		let instructionsText2 = "Do not allow your ball to be";
+		let instructionsText3 = "lost in the holes or dark edges.";
+		let instructionsText4 = "Earn as many points as possible.";
+		let instructionsText5 = "During play, press P to pause.";
+		let instructionsText6 = "Press Q to return to main screen.";
+		let instructionsText7 = "Press R to reset ball.";
+		let instructionsText8 = "Press the arrow keys to see";
+		let instructionsText9 = "to see what happens!";
+		let continueText = "Press any key to begin.";
+
+		do Output.moveCursor(3, 22);
+		do Output.printString(instructionsText1);
+		do Output.moveCursor(5, 18);
+		do Output.printString(instructionsText2);
+		do Output.moveCursor(6, 16);
+		do Output.printString(instructionsText3);
+		do Output.moveCursor(8, 16);
+		do Output.printString(instructionsText4);
+		do Output.moveCursor(10, 17);
+		do Output.printString(instructionsText5);
+		do Output.moveCursor(11, 15);
+		do Output.printString(instructionsText6);
+		do Output.moveCursor(12, 21);
+		do Output.printString(instructionsText7);
+		do Output.moveCursor(14, 18);
+		do Output.printString(instructionsText8);
+		do Output.moveCursor(15, 22);
+		do Output.printString(instructionsText9);
+		do Output.moveCursor(20, 20);
+		do Output.printString(continueText);
+
+		do instructionsText1.dispose();
+		do instructionsText2.dispose();
+		do instructionsText3.dispose();
+		do instructionsText4.dispose();
+		do instructionsText5.dispose();
+		do instructionsText6.dispose();
+		do instructionsText7.dispose();
+		do instructionsText8.dispose();
+		do instructionsText9.dispose();
+		do continueText.dispose();
+
+		return;
+	}
+}

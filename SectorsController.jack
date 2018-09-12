@@ -1,0 +1,200 @@
+
+class SectorsController
+{
+	field Point _position;
+	field boolean _ballLost;
+	field boolean _ballCollision;
+	field int _collisionVector;
+	field int _currentPoints;
+	field int _blocksRemaining;
+
+	field Array _sectors;
+
+	constructor SectorsController new(Point position, Array sectors)
+	{
+		var ConfigurableSectorController sector;
+		var int index;
+		let index = 0;
+
+		let _position = position;
+
+		// let _sectors = Array.new(9);
+		// let _sectors[0] = ConfigurableSectorController.new(Point.new(16,16));
+		// let _sectors[1] = ConfigurableSectorController.new(Point.new(176,16));
+		// let _sectors[2] = ConfigurableSectorController.new(Point.new(336,16));
+		// let _sectors[3] = ConfigurableSectorController.new(Point.new(16,96));
+		// let _sectors[4] = ConfigurableSectorController.new(Point.new(176,96));
+		// let _sectors[5] = ConfigurableSectorController.new(Point.new(336,96));
+		// let _sectors[6] = ConfigurableSectorController.new(Point.new(16,176));
+		// let _sectors[7] = ConfigurableSectorController.new(Point.new(176,176));
+		// let _sectors[8] = ConfigurableSectorController.new(Point.new(336,176));
+
+		let _sectors = sectors;
+		let _ballLost = false;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+		let _currentPoints = 0;
+		let _blocksRemaining = 0;
+
+		while (index < 9)
+		{
+			let sector = _sectors[index];
+			let _blocksRemaining = _blocksRemaining + sector.getBlocksRemaining();
+			let index = index + 1;
+		}
+
+		return this;
+	}
+
+	method boolean ballLost() { return _ballLost; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+	method int getPoints() { return _currentPoints; }
+	method int getBlocksRemaining() { return _blocksRemaining; }
+
+
+	method void update()
+	{
+		var int index;
+		var ConfigurableSectorController sector;
+
+		// Reset invariants for this game loop
+		let _currentPoints = 0;
+		let _blocksRemaining = 0;
+
+		// Get stats from each sector
+		let index = 0;
+		while (index < 9)
+		{
+			let sector = _sectors[index];
+
+			do sector.update();
+			let _currentPoints = _currentPoints + sector.getPoints();
+			let _blocksRemaining = _blocksRemaining + sector.getBlocksRemaining();
+			do sector.resetInvariants();
+
+			let index = index + 1;
+		}
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		var int index;
+		var ConfigurableSectorController sector;
+		var boolean ballWithinSector;
+
+		let _ballLost = false;
+		let _ballCollision = false;
+
+		// Update ball position within ea sector until ball is lost
+		let index = 0;
+		while ((index < 9) & (~_ballLost))
+		{
+			let sector = _sectors[index];
+
+			// Only run expensive calculations if ball is in sector
+			let ballWithinSector = sector.ballWithinSector(ball);
+			if (ballWithinSector)
+			{
+				do sector.clear();
+
+				do sector.updateBallPosition(ball);
+				let _ballLost = sector.ballLost();
+
+				do sector.render();
+			}
+
+			let index = index + 1;
+		}
+
+		// If ball was not lost, check for collisions
+		if (~_ballLost)
+		{
+			let index = 0;
+			while ((index < 9) & (~_ballCollision))
+			{
+				let sector = _sectors[index];
+
+				let _ballCollision = sector.ballCollision();
+				if (_ballCollision) { let _collisionVector = sector.getCollisionVector(); }
+
+				let index = index + 1;
+			}
+		}
+		else
+		{
+			do clear();
+			do render();
+		}
+
+		return;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		var int index;
+		var ConfigurableSectorController sector;
+
+		let index = 0;
+		while (index < 9)
+		{
+			let sector = _sectors[index];
+
+			do sector.updateKeyBoardInput(key);
+
+			let index = index + 1;
+		}
+
+		return;
+	}
+
+	method void clear()
+	{
+		do Screen.setColor(false);
+		do Screen.drawRectangle(16,16,495,255);
+
+		return;
+	}
+
+	method void render()
+	{
+		var int index;
+		var ConfigurableSectorController sector;
+
+		let index = 0;
+		while (index < 9)
+		{
+			let sector = _sectors[index];
+
+			do sector.render();
+
+			let index = index + 1;
+		}
+
+		return;
+	}
+
+	method void dispose()
+	{
+		var ConfigurableSectorController sector;
+		var int index;
+
+		do _position.dispose();
+
+		let index = 0;
+		while (index < 9)
+		{
+			let sector = _sectors[index];
+			do sector.dispose();
+			let index = index + 1;
+		}
+
+		do _sectors.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

@@ -1,0 +1,35 @@
+
+class GameEndSplashScreenController
+{
+	function void render(int points, boolean gameWon)
+	{
+		var String winText;
+		var String pointsText;
+		var String loseText;
+
+		let winText = "You Win!";
+		let pointsText = "Points:";
+		let loseText = "Game Over";
+
+		if (gameWon)
+		{
+			do Output.moveCursor(2, 2);
+			do Output.printString(winText);
+			do Output.moveCursor(3, 2);
+			do Output.printString(pointsText);
+			do Output.moveCursor(4, 2);
+			do Output.printInt(points);
+		}
+		else
+		{
+			do Output.moveCursor(2, 2);
+			do Output.printString(loseText);
+		}
+
+		do winText.dispose();
+		do pointsText.dispose();
+		do loseText.dispose();
+
+		return;
+	}
+}

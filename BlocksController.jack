@@ -1,0 +1,166 @@
+
+class BlocksController
+{
+	field Point _position;
+	field boolean _ballCollision;
+	field int _collisionVector;
+	field int _currentPoints;
+	field int _blocksRemaining;
+
+	field Array _blocks;
+	field Array _activeBlocks;
+
+	constructor BlocksController new(Point position, Array activeBlocks)
+	{
+		var int index;
+		var boolean active;
+
+		var int posX;
+		var int posY;
+
+		let _position = position;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+		let _currentPoints = 0;
+
+		let _activeBlocks = activeBlocks;
+
+		let _blocksRemaining = 0;
+
+		let index = 0;
+		while (index < 16)
+		{
+			let active = activeBlocks[index];
+
+			if (active) { let _blocksRemaining = _blocksRemaining + 1; }
+
+			let index = index + 1;
+		}
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let _blocks = Array.new(16);
+
+		let _blocks[0] = BlockController.new(Point.new( posX,        posY));
+		let _blocks[1] = BlockController.new(Point.new( posX + 40,   posY));
+		let _blocks[2] = BlockController.new(Point.new( posX + 80,   posY));
+		let _blocks[3] = BlockController.new(Point.new( posX + 120,  posY));
+		let _blocks[4] = BlockController.new(Point.new( posX,        posY + 20));
+		let _blocks[5] = BlockController.new(Point.new( posX + 40,   posY + 20));
+		let _blocks[6] = BlockController.new(Point.new( posX + 80,   posY + 20));
+		let _blocks[7] = BlockController.new(Point.new( posX + 120,  posY + 20));
+		let _blocks[8] = BlockController.new(Point.new( posX,        posY + 40));
+		let _blocks[9] = BlockController.new(Point.new( posX + 40,   posY + 40));
+		let _blocks[10] = BlockController.new(Point.new(posX + 80,   posY + 40));
+		let _blocks[11] = BlockController.new(Point.new(posX + 120,  posY + 40));
+		let _blocks[12] = BlockController.new(Point.new(posX,        posY + 60));
+		let _blocks[13] = BlockController.new(Point.new(posX + 40,   posY + 60));
+		let _blocks[14] = BlockController.new(Point.new(posX + 80,   posY + 60));
+		let _blocks[15] = BlockController.new(Point.new(posX + 120,  posY + 60));
+
+		return this;
+	}
+
+	method Point getPosition() { return _position; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+	method int getPoints() { return _currentPoints; }
+	method int getBlocksRemaining() { return _blocksRemaining; }
+
+	method void update()
+	{
+		let _currentPoints = 0;
+
+		if (_ballCollision) 
+		{ 
+			let _currentPoints = 10;
+			let _blocksRemaining = _blocksRemaining - 1;
+		}
+
+		return;
+	}
+
+	method void resetInvariants()
+	{
+		let _ballCollision = false;
+		let _currentPoints = 0;
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		var int index;
+		var BlockController block;
+		var boolean blockActive;
+
+		let _ballCollision = false;
+
+		let index = 0;
+
+		while ((~(_ballCollision)) & (index < 16))
+		{
+			let block = _blocks[index];
+			let blockActive = _activeBlocks[index];
+
+			if (blockActive) { 
+				do block.updateBallPosition(ball);
+				let _ballCollision = block.ballCollision();
+			}
+
+			let index = index + 1;
+		}
+
+		if (_ballCollision) 
+		{
+			let _collisionVector = block.getCollisionVector();
+			let _activeBlocks[index - 1] = false;
+		}
+
+		return;
+	}
+
+	method void render()
+	{
+		var int index;
+		var boolean active;
+		var BlockController block;
+
+		let index = 0;
+
+		while (index < 16)
+		{
+			let active = _activeBlocks[index];
+			let block = _blocks[index];
+			if (active) { do block.render(); }
+
+			let index = index + 1;
+		}
+
+		return;
+	}
+
+	method void dispose()
+	{
+		var BlockController block;
+		var int index;
+
+		do _position.dispose();
+		do _activeBlocks.dispose();
+
+		let index = 0;
+		while (index < 16)
+		{
+			let block = _blocks[index];
+			do block.dispose();
+
+			let index = index + 1;
+		}
+
+		do _blocks.dispose();
+
+		do Memory.deAlloc(this);
+		return;
+	}
+}

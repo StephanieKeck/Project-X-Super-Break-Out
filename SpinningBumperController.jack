@@ -1,0 +1,541 @@
+
+class SpinningBumperController
+{
+	field Point _position;
+
+	field boolean _ballCollision;
+	field int _collisionVector;
+	field int _currentPoints;
+
+	field Array _collisionPointsArrays;
+	field Array _renderPointsArrays;
+
+	field int _renderPointsCount;
+	field int _collisionPointsCount;
+
+	field int _rotation;
+
+	field int _radius;
+
+	constructor SpinningBumperController new(Point position, int variant)
+	{
+		var Array collisionPointsArray;
+		var Array renderPointsArray;
+
+		var int index;
+
+		let _position = position;
+
+		let _ballCollision = false;
+		let _collisionVector = -1;
+		let _currentPoints = 0;
+
+		let _rotation = 0;
+		let _radius = 16;
+
+		if (variant = 0) 
+		{ 
+			let _renderPointsCount = 4;
+			let _collisionPointsCount = 16;
+		}
+		if (variant = 1)
+		{
+			let _renderPointsCount = 8;
+			let _collisionPointsCount = 24;
+		}
+
+		let _renderPointsArrays = Array.new(4);
+		let _collisionPointsArrays = Array.new(4);
+
+		let index = 0;
+		while (index < 4)
+		{
+			let _renderPointsArrays[index] = Array.new(_renderPointsCount);
+			let _collisionPointsArrays[index] = Array.new(_collisionPointsCount);
+			let index = index + 1;
+		}
+
+		if (variant = 0)
+		{
+			let renderPointsArray = _renderPointsArrays[0];
+
+			let renderPointsArray[0] = Point.new(16,0);
+			let renderPointsArray[1] = Point.new(0,-16);
+			let renderPointsArray[2] = Point.new(-16,0);
+			let renderPointsArray[3] = Point.new(0,16);
+
+			let renderPointsArray = _renderPointsArrays[1];
+
+			let renderPointsArray[0] = Point.new(15,-6);
+			let renderPointsArray[1] = Point.new(-6,-15);
+			let renderPointsArray[2] = Point.new(-15,6);
+			let renderPointsArray[3] = Point.new(6,15);
+
+			let renderPointsArray = _renderPointsArrays[2];
+
+			let renderPointsArray[0] = Point.new(11,-11);
+			let renderPointsArray[1] = Point.new(-11,-11);
+			let renderPointsArray[2] = Point.new(-11,11);
+			let renderPointsArray[3] = Point.new(11,11);
+
+			let renderPointsArray = _renderPointsArrays[3];
+
+			let renderPointsArray[0] = Point.new(6,-15);
+			let renderPointsArray[1] = Point.new(-15,-6);
+			let renderPointsArray[2] = Point.new(-6,15);
+			let renderPointsArray[3] = Point.new(15,6);
+		}
+
+		if (variant = 1)
+		{
+			let renderPointsArray = _renderPointsArrays[0];
+
+			let renderPointsArray[0] = Point.new(16,0);
+			let renderPointsArray[1] = Point.new(6,-6);
+			let renderPointsArray[2] = Point.new(0,-16);
+			let renderPointsArray[3] = Point.new(-6,-6);
+			let renderPointsArray[4] = Point.new(-16,0);
+			let renderPointsArray[5] = Point.new(-6,6);
+			let renderPointsArray[6] = Point.new(0,16);
+			let renderPointsArray[7] = Point.new(6,6);
+
+			let renderPointsArray = _renderPointsArrays[1];
+
+			let renderPointsArray[0] = Point.new(15,-6);
+			let renderPointsArray[1] = Point.new(3,-7);
+			let renderPointsArray[2] = Point.new(-6,-15);
+			let renderPointsArray[3] = Point.new(-7,-3);
+			let renderPointsArray[4] = Point.new(-15,6);
+			let renderPointsArray[5] = Point.new(-3,7);
+			let renderPointsArray[6] = Point.new(6,15);
+			let renderPointsArray[7] = Point.new(7,3);
+
+			let renderPointsArray = _renderPointsArrays[2];
+
+			let renderPointsArray[0] = Point.new(11,-11);
+			let renderPointsArray[1] = Point.new(0,-8);
+			let renderPointsArray[2] = Point.new(-11,-11);
+			let renderPointsArray[3] = Point.new(-8,0);
+			let renderPointsArray[4] = Point.new(-11,11);
+			let renderPointsArray[5] = Point.new(0,8);
+			let renderPointsArray[6] = Point.new(11,11);
+			let renderPointsArray[7] = Point.new(8,0);
+
+			let renderPointsArray = _renderPointsArrays[3];
+
+			let renderPointsArray[0] = Point.new(6,-15);
+			let renderPointsArray[1] = Point.new(-7,3);
+			let renderPointsArray[2] = Point.new(-15,-6);
+			let renderPointsArray[3] = Point.new(-3,-7);
+			let renderPointsArray[4] = Point.new(-6,15);
+			let renderPointsArray[5] = Point.new(7,-3);
+			let renderPointsArray[6] = Point.new(15,6);
+			let renderPointsArray[7] = Point.new(3,7);
+		}
+
+		if (variant = 0)
+		{
+			let collisionPointsArray = _collisionPointsArrays[0];
+
+			let collisionPointsArray[0] = CollisionPoint.new(14,-2,16);
+			let collisionPointsArray[1] = CollisionPoint.new(10,-6,16);
+			let collisionPointsArray[2] = CollisionPoint.new(6,-10,16);
+			let collisionPointsArray[3] = CollisionPoint.new(2,-14,16);
+			let collisionPointsArray[4] = CollisionPoint.new(-2,-14,48);
+			let collisionPointsArray[5] = CollisionPoint.new(-6,-10,48);
+			let collisionPointsArray[6] = CollisionPoint.new(-10,-6,48);
+			let collisionPointsArray[7] = CollisionPoint.new(-14,-2,48);
+			let collisionPointsArray[8] = CollisionPoint.new(-14,2,80);
+			let collisionPointsArray[9] = CollisionPoint.new(-10,6,80);
+			let collisionPointsArray[10] = CollisionPoint.new(-6,10,80);
+			let collisionPointsArray[11] = CollisionPoint.new(-2,14,80);
+			let collisionPointsArray[12] = CollisionPoint.new(2,14,112);
+			let collisionPointsArray[13] = CollisionPoint.new(6,10,112);
+			let collisionPointsArray[14] = CollisionPoint.new(10,6,112);
+			let collisionPointsArray[15] = CollisionPoint.new(14,2,112);
+
+			let collisionPointsArray = _collisionPointsArrays[1];
+
+			let collisionPointsArray[0] = CollisionPoint.new(12,-7,24);
+			let collisionPointsArray[1] = CollisionPoint.new(7,-9,24);
+			let collisionPointsArray[2] = CollisionPoint.new(2,-12,24);
+			let collisionPointsArray[3] = CollisionPoint.new(-3,-14,24);
+			let collisionPointsArray[4] = CollisionPoint.new(-7,-12,56);
+			let collisionPointsArray[5] = CollisionPoint.new(-9,-7,56);
+			let collisionPointsArray[6] = CollisionPoint.new(-12,-2,56);
+			let collisionPointsArray[7] = CollisionPoint.new(-14,3,56);
+			let collisionPointsArray[8] = CollisionPoint.new(-12,7,88);
+			let collisionPointsArray[9] = CollisionPoint.new(-7,9,88);
+			let collisionPointsArray[10] = CollisionPoint.new(-2,12,88);
+			let collisionPointsArray[11] = CollisionPoint.new(3,14,88);
+			let collisionPointsArray[12] = CollisionPoint.new(7,12,120);
+			let collisionPointsArray[13] = CollisionPoint.new(9,7,120);
+			let collisionPointsArray[14] = CollisionPoint.new(12,2,120);
+			let collisionPointsArray[15] = CollisionPoint.new(14,-3,120);
+
+			let collisionPointsArray = _collisionPointsArrays[2];
+
+			let collisionPointsArray[0] = CollisionPoint.new(8,-11,32);
+			let collisionPointsArray[1] = CollisionPoint.new(3,-11,32);
+			let collisionPointsArray[2] = CollisionPoint.new(-3,-11,32);
+			let collisionPointsArray[3] = CollisionPoint.new(-8,-11,32);
+			let collisionPointsArray[4] = CollisionPoint.new(-11,-8,64);
+			let collisionPointsArray[5] = CollisionPoint.new(-11,-3,64);
+			let collisionPointsArray[6] = CollisionPoint.new(-11,3,64);
+			let collisionPointsArray[7] = CollisionPoint.new(-11,8,64);
+			let collisionPointsArray[8] = CollisionPoint.new(-8,11,96);
+			let collisionPointsArray[9] = CollisionPoint.new(-3,11,96);
+			let collisionPointsArray[10] = CollisionPoint.new(3,11,96);
+			let collisionPointsArray[11] = CollisionPoint.new(8,11,96);
+			let collisionPointsArray[12] = CollisionPoint.new(11,8,0);
+			let collisionPointsArray[13] = CollisionPoint.new(11,3,0);
+			let collisionPointsArray[14] = CollisionPoint.new(11,-3,0);
+			let collisionPointsArray[15] = CollisionPoint.new(11,-8,0);
+
+			let collisionPointsArray = _collisionPointsArrays[3];
+
+			let collisionPointsArray[0] = CollisionPoint.new(-7,12,40);
+			let collisionPointsArray[1] = CollisionPoint.new(-9,7,40);
+			let collisionPointsArray[2] = CollisionPoint.new(-12,2,40);
+			let collisionPointsArray[3] = CollisionPoint.new(-14,-3,40);
+			let collisionPointsArray[4] = CollisionPoint.new(-12,-7,72);
+			let collisionPointsArray[5] = CollisionPoint.new(-7,-9,72);
+			let collisionPointsArray[6] = CollisionPoint.new(-2,-12,72);
+			let collisionPointsArray[7] = CollisionPoint.new(3,-14,72);
+			let collisionPointsArray[8] = CollisionPoint.new(7,-12,104);
+			let collisionPointsArray[9] = CollisionPoint.new(9,-7,104);
+			let collisionPointsArray[10] = CollisionPoint.new(12,-2,104);
+			let collisionPointsArray[11] = CollisionPoint.new(14,3,104);
+			let collisionPointsArray[12] = CollisionPoint.new(12,7,8);
+			let collisionPointsArray[13] = CollisionPoint.new(7,9,8);
+			let collisionPointsArray[14] = CollisionPoint.new(2,12,8);
+			let collisionPointsArray[15] = CollisionPoint.new(-3,14,8);
+		}
+
+		if (variant = 1)
+		{
+			let collisionPointsArray = _collisionPointsArrays[0];
+
+			let collisionPointsArray[0] = CollisionPoint.new(14,-1,22);
+			let collisionPointsArray[1] = CollisionPoint.new(11,-3,22);
+			let collisionPointsArray[2] = CollisionPoint.new(8,-5,22);
+			let collisionPointsArray[3] = CollisionPoint.new(5,-8,11);
+			let collisionPointsArray[4] = CollisionPoint.new(3,-11,11);
+			let collisionPointsArray[5] = CollisionPoint.new(1,-14,11);
+			let collisionPointsArray[6] = CollisionPoint.new(-1,-14,53);
+			let collisionPointsArray[7] = CollisionPoint.new(-3,-11,53);
+			let collisionPointsArray[8] = CollisionPoint.new(-5,-8,53);
+			let collisionPointsArray[9] = CollisionPoint.new(-8,-5,42);
+			let collisionPointsArray[10] = CollisionPoint.new(-11,-3,42);
+			let collisionPointsArray[11] = CollisionPoint.new(-14,-1,42);
+			let collisionPointsArray[12] = CollisionPoint.new(-14,1,86);
+			let collisionPointsArray[13] = CollisionPoint.new(-11,3,86);
+			let collisionPointsArray[14] = CollisionPoint.new(-8,5,86);
+			let collisionPointsArray[15] = CollisionPoint.new(-5,8,75);
+			let collisionPointsArray[16] = CollisionPoint.new(-3,11,75);
+			let collisionPointsArray[17] = CollisionPoint.new(-1,14,75);
+			let collisionPointsArray[18] = CollisionPoint.new(1,14,117);
+			let collisionPointsArray[19] = CollisionPoint.new(3,11,117);
+			let collisionPointsArray[20] = CollisionPoint.new(5,8,117);
+			let collisionPointsArray[21] = CollisionPoint.new(8,5,106);
+			let collisionPointsArray[22] = CollisionPoint.new(11,3,106);
+			let collisionPointsArray[23] = CollisionPoint.new(14,1,106);
+
+			let collisionPointsArray = _collisionPointsArrays[1];
+
+			let collisionPointsArray[0] = CollisionPoint.new(12,-6,30);
+			let collisionPointsArray[1] = CollisionPoint.new(9,-6,30);
+			let collisionPointsArray[2] = CollisionPoint.new(6,-7,30);
+			let collisionPointsArray[3] = CollisionPoint.new(1,-9,19);
+			let collisionPointsArray[4] = CollisionPoint.new(-2,-11,19);
+			let collisionPointsArray[5] = CollisionPoint.new(-5,-13,19);
+			let collisionPointsArray[6] = CollisionPoint.new(-6,-12,91);
+			let collisionPointsArray[7] = CollisionPoint.new(-6,-9,91);
+			let collisionPointsArray[8] = CollisionPoint.new(-7,-6,91);
+			let collisionPointsArray[9] = CollisionPoint.new(-9,-1,50);
+			let collisionPointsArray[10] = CollisionPoint.new(-11,2,50);
+			let collisionPointsArray[11] = CollisionPoint.new(-13,5,50);
+			let collisionPointsArray[12] = CollisionPoint.new(-12,6,94);
+			let collisionPointsArray[13] = CollisionPoint.new(-9,6,94);
+			let collisionPointsArray[14] = CollisionPoint.new(-6,7,94);
+			let collisionPointsArray[15] = CollisionPoint.new(-1,9,83);
+			let collisionPointsArray[16] = CollisionPoint.new(2,11,83);
+			let collisionPointsArray[17] = CollisionPoint.new(5,13,83);
+			let collisionPointsArray[18] = CollisionPoint.new(6,12,125);
+			let collisionPointsArray[19] = CollisionPoint.new(6,9,125);
+			let collisionPointsArray[20] = CollisionPoint.new(7,6,125);
+			let collisionPointsArray[21] = CollisionPoint.new(9,1,114);
+			let collisionPointsArray[22] = CollisionPoint.new(11,-2,114);
+			let collisionPointsArray[23] = CollisionPoint.new(13,-5,114);
+
+			let collisionPointsArray = _collisionPointsArrays[2];
+
+			let collisionPointsArray[0] = CollisionPoint.new(9,-10,38);
+			let collisionPointsArray[1] = CollisionPoint.new(6,-9,38);
+			let collisionPointsArray[2] = CollisionPoint.new(3,-8,38);
+			let collisionPointsArray[3] = CollisionPoint.new(-3,-8,27);
+			let collisionPointsArray[4] = CollisionPoint.new(-6,-9,27);
+			let collisionPointsArray[5] = CollisionPoint.new(-9,-10,27);
+			let collisionPointsArray[6] = CollisionPoint.new(-10,-9,99);
+			let collisionPointsArray[7] = CollisionPoint.new(-9,-6,99);
+			let collisionPointsArray[8] = CollisionPoint.new(-8,-3,99);
+			let collisionPointsArray[9] = CollisionPoint.new(-8,3,58);
+			let collisionPointsArray[10] = CollisionPoint.new(-9,6,58);
+			let collisionPointsArray[11] = CollisionPoint.new(-10,9,58);
+			let collisionPointsArray[12] = CollisionPoint.new(-9,10,102);
+			let collisionPointsArray[13] = CollisionPoint.new(-6,9,102);
+			let collisionPointsArray[14] = CollisionPoint.new(-3,8,102);
+			let collisionPointsArray[15] = CollisionPoint.new(3,8,91);
+			let collisionPointsArray[16] = CollisionPoint.new(6,9,91);
+			let collisionPointsArray[17] = CollisionPoint.new(9,10,91);
+			let collisionPointsArray[18] = CollisionPoint.new(10,9,133);
+			let collisionPointsArray[19] = CollisionPoint.new(9,6,133);
+			let collisionPointsArray[20] = CollisionPoint.new(8,3,133);
+			let collisionPointsArray[21] = CollisionPoint.new(8,-3,122);
+			let collisionPointsArray[22] = CollisionPoint.new(9,-6,122);
+			let collisionPointsArray[23] = CollisionPoint.new(10,-9,122);
+
+			let collisionPointsArray = _collisionPointsArrays[3];
+
+			let collisionPointsArray[0] = CollisionPoint.new(3,-13,46);
+			let collisionPointsArray[1] = CollisionPoint.new(0,-6,46);
+			let collisionPointsArray[2] = CollisionPoint.new(-3,-1,46);
+			let collisionPointsArray[3] = CollisionPoint.new(-9,1,35);
+			let collisionPointsArray[4] = CollisionPoint.new(-11,-2,35);
+			let collisionPointsArray[5] = CollisionPoint.new(-13,-5,35);
+			let collisionPointsArray[6] = CollisionPoint.new(-12,-6,107);
+			let collisionPointsArray[7] = CollisionPoint.new(-9,-6,107);
+			let collisionPointsArray[8] = CollisionPoint.new(-6,-7,107);
+			let collisionPointsArray[9] = CollisionPoint.new(-4,-2,66);
+			let collisionPointsArray[10] = CollisionPoint.new(-5,4,66);
+			let collisionPointsArray[11] = CollisionPoint.new(-6,10,66);
+			let collisionPointsArray[12] = CollisionPoint.new(-3,13,110);
+			let collisionPointsArray[13] = CollisionPoint.new(0,-6,110);
+			let collisionPointsArray[14] = CollisionPoint.new(3,-1,110);
+			let collisionPointsArray[15] = CollisionPoint.new(9,-1,99);
+			let collisionPointsArray[16] = CollisionPoint.new(11,2,99);
+			let collisionPointsArray[17] = CollisionPoint.new(13,5,99);
+			let collisionPointsArray[18] = CollisionPoint.new(12,6,141);
+			let collisionPointsArray[19] = CollisionPoint.new(9,6,141);
+			let collisionPointsArray[20] = CollisionPoint.new(6,7,141);
+			let collisionPointsArray[21] = CollisionPoint.new(4,2,130);
+			let collisionPointsArray[22] = CollisionPoint.new(5,-4,130);
+			let collisionPointsArray[23] = CollisionPoint.new(6,-10,130);
+		}
+
+		return this;
+	}
+
+	method boolean ballLost() { return false; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+	method int getPoints() { return _currentPoints; }
+
+	method void update()
+	{
+		let _currentPoints = 0;
+
+		if (_ballCollision) { let _currentPoints = 15; }
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		let _ballCollision = false;
+
+		do _calculateCollisionWithSelf(ball);
+
+		return;
+	}
+
+	method void _calculateCollisionWithSelf(BallController ball)
+	{
+		var Array collisionPoints;
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int posX;
+		var int posY;
+		var int ballX;
+		var int ballY;
+
+		var boolean ballWithinBounds;
+
+		var int distanceToBall;
+		var int distanceToCollision;
+		var int maximumCollisionDistance;
+
+		var CollisionPoint cPoint;
+		var int cx;
+		var int cy;
+
+		let ballWithinBounds = _ballWithinBounds(ball);
+
+		if (ballWithinBounds)
+		{
+			let ballPosition = ball.getPosition();
+			let ballRadius = ball.getRadius();
+
+			let distanceToBall = Point.distanceBetweenPoints(_position, ballPosition);
+
+			if ((distanceToBall - ballRadius) < _radius)
+			{
+				let collisionPoints = _collisionPointsArrays[_rotation];
+
+				let cPoint = CollisionPoint.getClosestCollisionPoint(ballPosition, _position, collisionPoints, _collisionPointsCount);
+
+				let cx = cPoint.getX();
+				let cy = cPoint.getY();
+
+				let posX = _position.getX();
+				let posY = _position.getY();
+				let ballX = ballPosition.getX();
+				let ballY = ballPosition.getY();
+
+				let distanceToCollision = Point.distanceBetweenPointsByCoordinates(cx + posX, cy + posY, ballX, ballY);
+
+				let maximumCollisionDistance = 4;
+
+				if ((distanceToCollision - ballRadius) < maximumCollisionDistance)
+				{
+					let _ballCollision = true;
+					let _collisionVector = cPoint.getVector();
+				}
+			}
+		}
+
+		return;
+	}
+
+	method boolean _ballWithinBounds(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int posX;
+		var int posY;
+		var int ballX;
+		var int ballY;
+
+		var int threshold;
+
+		var int normalized_left_edge;
+		var int normalized_right_edge;
+		var int normalized_top_edge;
+		var int normalized_bottom_edge;
+
+		var boolean withinLeftEdge;
+		var boolean withinRightEdge;
+		var boolean withinTopEdge;
+		var boolean withinBottomEdge;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+		let ballX = ballPosition.getX();
+		let ballY = ballPosition.getY();
+
+		let threshold = 2;
+
+		let normalized_left_edge = posX - _radius - ballRadius - threshold;
+		let normalized_right_edge = posX + _radius + ballRadius + threshold;
+		let normalized_top_edge = posY - _radius - ballRadius - threshold;
+		let normalized_bottom_edge = posY + _radius + ballRadius + threshold;
+
+		let withinLeftEdge = ballX > normalized_left_edge;
+		let withinRightEdge = ballX < normalized_right_edge;
+		let withinTopEdge = ballY > normalized_top_edge;
+		let withinBottomEdge = ballY < normalized_bottom_edge;
+
+		return withinLeftEdge & withinRightEdge & withinTopEdge & withinBottomEdge;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		if (key = 130)
+		{
+			do rotateLeft();
+		}
+
+		if (key = 132)
+		{
+			do rotateRight();
+		}
+
+		return;
+	}
+
+	method void render()
+	{
+		var Array renderPoints;
+
+		let renderPoints = _renderPointsArrays[_rotation];
+
+		do RenderUtil.drawPointsWithOffset(_position, renderPoints, _renderPointsCount);
+
+		return;
+	}
+
+	method void rotateRight()
+	{
+		if (_rotation = 0) { let _rotation = 3; }
+		else { let _rotation = _rotation - 1; }
+
+		return;
+	}
+
+	method void rotateLeft()
+	{
+		if (_rotation = 3) { let _rotation = 0; }
+		else { let _rotation = _rotation + 1; }
+
+		return;
+	}
+
+	method void dispose()
+	{
+		var Array collisionPoints;
+		var Array renderPoints;
+		var CollisionPoint cPoint;
+		var Point p;
+		var int index1;
+		var int index2;
+
+		do _position.dispose();
+
+		let index1 = 0;
+		while (index1 < 4)
+		{
+			let collisionPoints = _collisionPointsArrays[index1];
+			let renderPoints = _renderPointsArrays[index1];
+
+			let index2 = 0;
+			while (index2 < _collisionPointsCount)
+			{
+				let cPoint = collisionPoints[index2];
+				do cPoint.dispose();
+				let index2 = index2 + 1;
+			}
+
+			let index2 = 0;
+			while (index2 < _renderPointsCount)
+			{
+				let p = renderPoints[index2];
+				do p.dispose();
+				let index2 = index2 + 1;
+			}
+
+			let index1 = index1 + 1;
+		}
+
+		do _collisionPointsArrays.dispose();
+		do _renderPointsArrays.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

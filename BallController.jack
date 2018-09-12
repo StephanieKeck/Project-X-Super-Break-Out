@@ -1,0 +1,252 @@
+
+class BallController
+{
+	field Point _position;
+	field int _radius;
+
+	field int _direction;
+
+	field Point _target;
+	field Point _previousTarget;
+	field int _nextStepBetweenTargets;
+	field int _stepsBetweenTargets;
+
+	field boolean _isStopped;
+	field int _cyclesSinceLastCollision;
+
+	field Array _referencePoints;
+	field int _referencePointsCount;
+
+	constructor BallController new(Point position, int radius)
+	{
+		let _position = position;
+		let _radius = radius;
+
+		let _direction = 0;
+		let _target = Point.new(0,0);
+		let _previousTarget = Point.new(0,0);
+
+		let _nextStepBetweenTargets = 1;
+		let _stepsBetweenTargets = 16;
+
+		let _cyclesSinceLastCollision = 0;
+
+		let _isStopped = true;
+
+		let _referencePointsCount = 33;
+
+		let _referencePoints = Array.new(_referencePointsCount);
+
+		let _referencePoints[0] = Point.new(64,0);
+		let _referencePoints[1] = Point.new(64,-3);
+		let _referencePoints[2] = Point.new(64,-6);
+		let _referencePoints[3] = Point.new(64,-9);
+		let _referencePoints[4] = Point.new(63,-12);
+		let _referencePoints[5] = Point.new(62,-15);
+		let _referencePoints[6] = Point.new(61,-19);
+		let _referencePoints[7] = Point.new(60,-22);
+		let _referencePoints[8] = Point.new(59,-24);
+		let _referencePoints[9] = Point.new(58,-27);
+		let _referencePoints[10] = Point.new(56,-30);
+		let _referencePoints[11] = Point.new(55,-33);
+		let _referencePoints[12] = Point.new(53,-36);
+		let _referencePoints[13] = Point.new(51,-38);
+		let _referencePoints[14] = Point.new(49,-41);
+		let _referencePoints[15] = Point.new(47,-43);
+		let _referencePoints[16] = Point.new(45,-45);
+		let _referencePoints[17] = Point.new(43,-47);
+		let _referencePoints[18] = Point.new(41,-49);
+		let _referencePoints[19] = Point.new(38,-51);
+		let _referencePoints[20] = Point.new(36,-53);
+		let _referencePoints[21] = Point.new(33,-55);
+		let _referencePoints[22] = Point.new(30,-56);
+		let _referencePoints[23] = Point.new(27,-58);
+		let _referencePoints[24] = Point.new(24,-59);
+		let _referencePoints[25] = Point.new(22,-60);
+		let _referencePoints[26] = Point.new(19,-61);
+		let _referencePoints[27] = Point.new(15,-62);
+		let _referencePoints[28] = Point.new(12,-63);
+		let _referencePoints[29] = Point.new(9,-64);
+		let _referencePoints[30] = Point.new(6,-64);
+		let _referencePoints[31] = Point.new(3,-64);
+		let _referencePoints[32] = Point.new(0,-64);
+
+		do _updateTarget();
+
+		return this;
+	}
+
+	method void stop() 
+	{ 
+		let _isStopped = true; 
+		return;
+	}
+	method void start() 
+	{ 
+		let _isStopped = false;
+		return;
+	}
+	method boolean isStopped() { return _isStopped; }
+	method void moveTo(Point position)
+	{
+		do _position.updateCoordinatesFromPoint(position);
+		do _previousTarget.updateCoordinatesFromPoint(position);
+		let _nextStepBetweenTargets = 1;
+
+		return;
+	}
+	method Point getPosition() { return _position; }
+	method int getRadius() { return _radius; }
+	method int getDirection() { return _direction; }
+	method int getCyclesSinceLastCollision() { return _cyclesSinceLastCollision; }
+
+	method void update()
+	{
+		if (~_isStopped)
+		{
+			do _updatePosition();
+
+			let _cyclesSinceLastCollision = _cyclesSinceLastCollision + 1;
+		}
+
+		return;
+	}
+
+	method void updateDirection(int direction) 
+	{
+		let _cyclesSinceLastCollision = 0;
+		let _direction = direction;
+		do _updateTarget();
+
+		return;
+	}
+
+	method void _updatePosition()
+	{
+		var int prevX;
+		var int prevY;
+		var int targetX;
+		var int targetY;
+
+		var int xDistanceToNextTarget;
+		var int yDistanceToNextTarget;
+
+		var int nextX;
+		var int nextY;
+
+		var int normalizedNextX;
+		var int normalizedNextY;
+
+		let prevX = _previousTarget.getX();
+		let prevY = _previousTarget.getY();
+
+		let targetX = _target.getX();
+		let targetY = _target.getY();
+
+		if (_nextStepBetweenTargets = _stepsBetweenTargets)
+		{
+			let normalizedNextX = targetX + prevX;
+			let normalizedNextY = targetY + prevY;
+
+			let _nextStepBetweenTargets = 1;
+			do _previousTarget.updateCoordinates(normalizedNextX, normalizedNextY);
+		}
+		else
+		{
+			let nextX = Math.divide(Math.multiply(targetX, _nextStepBetweenTargets), _stepsBetweenTargets);
+			let nextY = Math.divide(Math.multiply(targetY, _nextStepBetweenTargets), _stepsBetweenTargets);
+
+			let normalizedNextX = nextX + prevX;
+			let normalizedNextY = nextY + prevY;
+
+			let _nextStepBetweenTargets = _nextStepBetweenTargets + 1;
+		}
+
+		do _position.updateCoordinates(normalizedNextX, normalizedNextY);
+
+		return;
+	}
+
+	method void _updateTarget()
+	{
+		var Point reference;
+		var int refX;
+		var int refY;
+
+		var int referenceAngle;
+		var boolean negX;
+		var boolean negY;
+
+		let negX = false;
+		let negY = false;
+
+		let _nextStepBetweenTargets = 1;
+
+		do _previousTarget.updateCoordinatesFromPoint(_position);
+
+		if ((_direction > -1) & (_direction < 33)) { let referenceAngle = _direction; }
+		if ((_direction > 32) & (_direction < 65)) { let referenceAngle = 64 - _direction; }
+		if ((_direction > 64) & (_direction < 97)) { let referenceAngle = _direction - 64; }
+		if ((_direction > 96) & (_direction < 128)) { let referenceAngle = 128 - _direction; }
+
+		let negX = ((_direction > 32) & (_direction < 96));
+		let negY = ((_direction > 64) & (_direction < 128));
+
+		let reference = _referencePoints[referenceAngle];
+		let refX = reference.getX();
+		let refY = reference.getY();
+
+		if (negX) { let refX = 0 - refX; }
+		if (negY) { let refY = 0 - refY; }
+
+		do _target.updateCoordinates(refX, refY);
+
+		return;
+	}
+
+	method void render()
+	{
+		var int posX;
+		var int posY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		if (posX < (1 + _radius)) { let posX = 1 + _radius; }
+		if (posX > (511 - _radius)) { let posX = 511 - _radius; }
+		if (posY < (1 + _radius)) { let posY = 1 + _radius; }
+		if (posY > (254 - _radius)) { let posY = 254 - _radius; }
+
+		do Screen.setColor(true);
+		do Screen.drawCircle(posX, posY, _radius);
+
+		do Screen.setColor(false);
+		do Screen.drawCircle(posX, posY, _radius - 1);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		var Point p;
+		var int index;
+
+		do _position.dispose();
+		do _target.dispose();
+		do _previousTarget.dispose();
+
+		let index = 0;
+		while (index < _referencePointsCount)
+		{
+			let p = _referencePoints[index];
+			do p.dispose();
+			let index = index + 1;
+		}
+
+		do _referencePoints.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

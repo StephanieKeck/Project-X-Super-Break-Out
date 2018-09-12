@@ -1,0 +1,122 @@
+
+
+class GameController 
+{
+	function void run() {
+		var FieldController fieldController;
+		var boolean paused;
+		var boolean gameEnded;
+		var boolean gameWon;
+		var boolean exitToMain;
+		var int points;
+		var char key;
+
+		let key = 0;
+		let exitToMain = false;
+		let paused = false;
+
+		// At game start, display instructions
+		do InstructionsSplashScreenController.render();
+
+		do Output.moveCursor(0,0);
+		do Output.printInt(key);
+
+		// Wait for user acknowledgement
+		while (key = 0)
+		{
+			let key = Keyboard.keyPressed();
+		}
+
+		do Sys.wait(100);
+
+		// Dismiss instructions screen
+		do Screen.clearScreen();
+
+		// Initialize game logic
+		let fieldController = FieldController.new();
+		do fieldController.render();
+
+		// Run game loop until user exits to main screen
+		while(~exitToMain)
+		{
+			// At start of every loop, check keyboard input
+			let key = Keyboard.keyPressed();
+			// Check if user wants to exit
+			if (key = 81) { let exitToMain = true; } // q key
+			
+			// If exit, exit to main screen immediately
+			if (~exitToMain)
+			{
+				// Check if user wants to pause
+				if (key = 80) { let paused = true; } // p key
+
+				// If paused, display pause screen
+				if (paused)
+				{
+					do Screen.clearScreen();
+					do PausedSplashScreenController.render();
+
+					do Sys.wait(100);
+
+					let key = 0;
+
+					// Stop game loop until user unpauses game
+					while (key = 0)
+					{
+						let key = Keyboard.keyPressed();
+					}
+
+					do Sys.wait(100);
+
+					let paused = false;
+
+					do Screen.clearScreen();
+					do fieldController.render();
+				}
+				else // Else process a game loop
+				{
+					// Update game logic, processing keyboard input as appropriate.
+					do fieldController.updateKeyBoardInput(key);
+					do fieldController.update();
+
+					// If game is completed, display end-game splash screen
+					let gameEnded = fieldController.gameEnded();
+
+					if (gameEnded) 
+					{ 
+						do Screen.clearScreen();
+
+						// Determine if game was won or lost
+						let gameWon = fieldController.gameWon();
+						let exitToMain = true;
+						let key = 0;
+
+						// Get final point count
+						let points = fieldController.getPoints();
+
+						do GameEndSplashScreenController.render(points, gameWon);
+
+						do Sys.wait(100);
+
+						// Display screen until user input
+						while (key = 0)
+						{
+							let key = Keyboard.keyPressed();
+						}
+					}
+
+					// Game loop runs every 33 ms (30 fps)
+					do Sys.wait(33);
+				}
+
+			}
+		}
+
+		do Sys.wait(100);
+
+		// Destroy field controller since we don't need it anymore
+		//do fieldController.dispose();
+
+		return;
+	}
+}

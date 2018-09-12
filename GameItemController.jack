@@ -1,0 +1,161 @@
+
+class GameItemController
+{
+	field boolean _ballLost;
+	field boolean _ballCollision;
+	field int _collisionVector;
+	field int _currentPoints;
+
+	field int _mode;
+
+	field SmallTrackedBumberController _smallTrackedBumberController;
+	field LargeTrackedBumberController _largeTrackedBumberController;
+	field SpinningBumperController _spinningBumperController;
+	field RotatingPaddleAndHoleController _rotatingPaddleController;
+
+	constructor GameItemController new(Point position, int mode, int variant)
+	{
+		let _mode = mode;
+
+		if (_mode = 1) { let _smallTrackedBumberController = SmallTrackedBumberController.new(position, variant); }
+		if (_mode = 2) { let _largeTrackedBumberController = LargeTrackedBumberController.new(position, variant); }
+		if (_mode = 3) { let _spinningBumperController = SpinningBumperController.new(position, variant); }
+		if (_mode = 4) { let _rotatingPaddleController = RotatingPaddleAndHoleController.new(position, variant); }
+
+		let _ballLost = false;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+		let _currentPoints = 0;
+
+		return this;
+	}
+
+	method boolean ballLost() { return _ballLost; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+	method int getPoints() { return _currentPoints; }
+
+	method void update()
+	{
+		if (_mode = 1)
+		{
+			do _smallTrackedBumberController.update();
+
+			let _currentPoints = _smallTrackedBumberController.getPoints();
+		}
+
+		if (_mode = 2)
+		{
+			do _largeTrackedBumberController.update();
+
+			let _currentPoints = _largeTrackedBumberController.getPoints();
+		}
+
+		if (_mode = 3)
+		{
+			do _spinningBumperController.update();
+
+			let _currentPoints = _spinningBumperController.getPoints();
+		}
+
+		if (_mode = 4)
+		{
+			do _rotatingPaddleController.update();
+
+			let _currentPoints = _rotatingPaddleController.getPoints();
+		}
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		if (_mode = 1)
+		{
+			do _smallTrackedBumberController.updateBallPosition(ball);
+
+			let _ballLost = _smallTrackedBumberController.ballLost();
+
+			if (~_ballLost)
+			{
+				let _ballCollision = _smallTrackedBumberController.ballCollision();
+
+				if (_ballCollision) { let _collisionVector = _smallTrackedBumberController.getCollisionVector(); }
+			}
+		}
+
+		if (_mode = 2)
+		{
+			do _largeTrackedBumberController.updateBallPosition(ball);
+
+			let _ballLost = _largeTrackedBumberController.ballLost();
+
+			if (~_ballLost)
+			{
+				let _ballCollision = _largeTrackedBumberController.ballCollision();
+
+				if (_ballCollision) { let _collisionVector = _largeTrackedBumberController.getCollisionVector(); }
+			}
+		}
+
+		if (_mode = 3)
+		{
+			do _spinningBumperController.updateBallPosition(ball);
+
+			let _ballLost = _spinningBumperController.ballLost();
+
+			if (~_ballLost)
+			{
+				let _ballCollision = _spinningBumperController.ballCollision();
+
+				if (_ballCollision) { let _collisionVector = _spinningBumperController.getCollisionVector(); }
+			}
+		}
+
+		if (_mode = 4)
+		{
+			do _rotatingPaddleController.updateBallPosition(ball);
+
+			let _ballLost = _rotatingPaddleController.ballLost();
+
+			if (~_ballLost)
+			{
+				let _ballCollision = _rotatingPaddleController.ballCollision();
+
+				if (_ballCollision) { let _collisionVector = _rotatingPaddleController.getCollisionVector(); }
+			}
+		}
+
+		return;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		if (_mode = 1) { do _smallTrackedBumberController.updateKeyBoardInput(key); }
+		if (_mode = 2) { do _largeTrackedBumberController.updateKeyBoardInput(key); }
+		if (_mode = 3) { do _spinningBumperController.updateKeyBoardInput(key); }
+		if (_mode = 4) { do _rotatingPaddleController.updateKeyBoardInput(key); }
+
+		return;
+	}
+
+	method void render()
+	{
+		if (_mode = 1) { do _smallTrackedBumberController.render(); }
+		if (_mode = 2) { do _largeTrackedBumberController.render(); }
+		if (_mode = 3) { do _spinningBumperController.render(); }
+		if (_mode = 4) { do _rotatingPaddleController.render(); }
+
+		return;
+	}
+
+	method void dispose()
+	{
+		if (_mode = 1) { do _smallTrackedBumberController.dispose(); }
+		if (_mode = 2) { do _largeTrackedBumberController.dispose(); }
+		if (_mode = 3) { do _spinningBumperController.dispose(); }
+		if (_mode = 4) { do _rotatingPaddleController.dispose(); }
+		do Memory.deAlloc(this);
+		return;
+	}
+}

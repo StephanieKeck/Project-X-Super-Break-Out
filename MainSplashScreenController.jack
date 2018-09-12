@@ -1,0 +1,27 @@
+
+class MainSplashScreenController
+{
+	function void render()
+	{
+		var String gameNameText;
+		var String beginText;
+		var String quitText;
+
+		let gameNameText = "Super Break-Out";
+		let beginText = "Press any key to begin.";
+		let quitText = "Press Q to quit.";
+
+		do Output.moveCursor(7,23);
+		do Output.printString(gameNameText);
+		do Output.moveCursor(13,19);
+		do Output.printString(beginText);
+		do Output.moveCursor(14,23);
+		do Output.printString(quitText);
+
+		do gameNameText.dispose();
+		do beginText.dispose();
+		do quitText.dispose();
+
+		return;
+	}
+}

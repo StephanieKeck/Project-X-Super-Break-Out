@@ -1,0 +1,49 @@
+
+class MainController 
+{
+	function void runGame()
+	{
+		var GameController gameController;
+		var char key;
+		var boolean quit;
+
+		let quit = false;
+		let key = 0;
+
+		// Run application loop until user quits
+		while (~quit)
+		{
+			// Ask user to press any key to begin
+			do Screen.clearScreen();
+			do MainSplashScreenController.render();
+
+			// Reset key to 0
+			let key = 0;
+
+			// Wait for user input
+			while (key = 0)
+			{
+				let key = Keyboard.keyPressed();
+			}
+
+			do Sys.wait(100);
+
+			// Check if user has quit; user can only quit
+			// from the main screen
+			if (key = 81) { let quit = true; } // q key
+
+			// If quit, exit immediately
+			if (~quit)
+			{
+				// Clear splash screen
+				do Screen.clearScreen();
+
+				do GameController.run();
+			}
+
+			// New loop cycle represents an exit to splash screen
+		}
+
+		return;
+	}
+}

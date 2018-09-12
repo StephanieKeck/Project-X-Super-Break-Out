@@ -1,0 +1,66 @@
+
+class Point
+{
+	field int _x;
+	field int _y;
+
+	function int distanceBetweenPoints(Point a, Point b)
+	{
+		var int ax;
+		var int ay;
+		var int bx;
+		var int by;
+
+		let ax = a.getX();
+		let ay = a.getY();
+		let bx = b.getX();
+		let by = b.getY();
+
+		return Math.sqrt(((ax - bx)*(ax - bx)) + ((ay - by)*(ay - by)));
+	}
+
+	function int distanceBetweenPointsByCoordinates(int ax, int ay, int bx, int by)
+	{
+		return Math.sqrt(((ax - bx)*(ax - bx)) + ((ay - by)*(ay - by)));
+	}
+
+	constructor Point new(int x, int y)
+	{
+		let _x = x;
+		let _y = y;
+
+		return this;
+	}
+
+	method int getX() { return _x; }
+	method int getY() { return _y; }
+
+	method void updateCoordinates(int x, int y)
+	{
+		let _x = x;
+		let _y = y;
+
+		return;
+	}
+
+	method void updateCoordinatesFromPoint(Point p)
+	{
+		var int px;
+		var int py;
+
+		let px = p.getX();
+		let py = p.getY();
+
+		let _x = px;
+		let _y = py;
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

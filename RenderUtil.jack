@@ -1,0 +1,83 @@
+
+class RenderUtil
+{
+	function void drawPointsWithOffset(Point offset, Array points, int size)
+	{
+		var int offsetX;
+		var int offsetY;
+
+		var Point a;
+		var Point b;
+		var int ax;
+		var int ay;
+		var int bx;
+		var int by;
+
+		var int index;
+
+		let offsetX = offset.getX();
+		let offsetY = offset.getY();
+
+		let index = 0;
+
+		do Screen.setColor(true);
+
+		while (index < size)
+		{
+			let a = points[index];
+
+			if (index = (size - 1)) { let b = points[0]; }
+			else { let b = points[index + 1]; }
+
+			let ax = a.getX();
+			let ay = a.getY();
+			let bx = b.getX();
+			let by = b.getY();
+
+			do Screen.drawLine(ax + offsetX, ay + offsetY, bx + offsetX, by + offsetY);
+
+			let index = index + 1;
+		}
+
+		return;
+	}
+
+	function void drawPointsWithOffsetOpen(Point offset, Array points, int size)
+	{
+		var int offsetX;
+		var int offsetY;
+
+		var Point a;
+		var Point b;
+		var int ax;
+		var int ay;
+		var int bx;
+		var int by;
+
+		var int index;
+
+		let offsetX = offset.getX();
+		let offsetY = offset.getY();
+
+		let index = 0;
+
+		do Screen.setColor(true);
+
+		while (index < (size - 1))
+		{
+			let a = points[index];
+			let b = points[index + 1];
+
+			let ax = a.getX();
+			let ay = a.getY();
+			let bx = b.getX();
+			let by = b.getY();
+
+			do Screen.drawLine(ax + offsetX, ay + offsetY, bx + offsetX, by + offsetY);
+
+			let index = index + 1;
+		}
+
+		return;
+	}
+}

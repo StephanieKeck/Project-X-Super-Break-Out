@@ -1,0 +1,54 @@
+
+class StatsUIController
+{
+	function void render(int level, int points, int ballsRemaining)
+	{
+		var String levelText;
+		var String pointsText;
+		var String ballsText;
+
+		let levelText = "Level:";
+		let pointsText = "Points:";
+		let ballsText = "Balls:";
+
+		do Output.moveCursor(0,0);
+		do Output.printString(levelText);
+		do Output.moveCursor(0,7);
+		do Output.printInt(level);
+		do Output.moveCursor(0,10);
+		do Output.printString(pointsText);
+		do Output.moveCursor(0,18);
+		do Output.printInt(points);
+		do Output.moveCursor(0,55);
+		do Output.printString(ballsText);
+		do Output.moveCursor(0,62);
+		do Output.printInt(ballsRemaining);
+
+		do levelText.dispose();
+		do pointsText.dispose();
+		do ballsText.dispose();
+
+		return;
+	}
+
+	function void clear()
+	{
+		do Screen.setColor(false);
+		do Screen.drawRectangle(0,0,511,16);
+
+		return;
+	}
+
+	function boolean ballWithinStatsArea(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+		var int ballY;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+		let ballY = ballPosition.getY();
+
+		return (ballY - ballRadius) < 17;
+	}
+}

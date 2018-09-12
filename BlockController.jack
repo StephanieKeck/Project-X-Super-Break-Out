@@ -1,0 +1,162 @@
+
+class BlockController
+{
+	field Point _position;
+	field boolean _ballCollision;
+	field int _collisionVector;
+
+	field int _width;
+	field int _height;
+
+	constructor BlockController new(Point position)
+	{
+		let _position = position;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+		let _width = 36;
+		let _height = 16;
+
+		return this;
+	}
+
+	method Point getPosition() { return _position; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+
+	method void updateBallPosition(BallController ball)
+	{
+		let _ballCollision = false;
+
+		do _calculateCollisionWithSelf(ball);
+
+		return;
+	}
+
+	method void _calculateCollisionWithSelf(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int posX;
+		var int posY;
+		var int ballX;
+		var int ballY;
+
+		var int threshold;
+
+		var int normalized_top_edge;
+		var int normalized_bottom_edge;
+		var int normalized_left_edge;
+		var int normalized_right_edge;
+
+		var int inner_limit;
+		var int inner_left_edge;
+		var int inner_right_edge;
+		var int yCenter;
+
+		var boolean belowTop;
+		var boolean aboveBottom;
+		var boolean belowLeft;
+		var boolean aboveRight;
+
+		var boolean withinXBounds;
+		var boolean withinYBounds;
+
+		var boolean topCollision;
+		var boolean bottomCollision;
+		var boolean leftCollision;
+		var boolean rightCollision;
+		var boolean xCollsion;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let ballX = ballPosition.getX();
+		let ballY = ballPosition.getY();
+
+		let threshold = 2;
+
+		let normalized_top_edge = posY - ballRadius - threshold;
+		let normalized_bottom_edge = posY + _height + ballRadius + threshold;
+		let normalized_left_edge = posX - ballRadius - threshold;
+		let normalized_right_edge = posX + _width + ballRadius + threshold;
+
+		let belowTop = ballY > normalized_top_edge;
+		let aboveBottom = ballY < normalized_bottom_edge;
+		let belowLeft = ballX > normalized_left_edge;
+		let aboveRight = ballX < normalized_right_edge;
+
+		let withinXBounds = belowLeft & aboveRight;
+		let withinYBounds = belowTop & aboveBottom;
+
+		if (withinXBounds & withinYBounds)
+		{
+			let _ballCollision = true;
+
+			let inner_limit = 4;
+			let inner_left_edge = normalized_left_edge + inner_limit;
+			let inner_right_edge = normalized_right_edge - inner_limit;
+			let yCenter = posY + (_height/2);
+
+			let topCollision = ballY < yCenter;
+			let bottomCollision = (ballY > yCenter) | (ballY = yCenter);
+			let leftCollision = ballX < inner_left_edge;
+			let rightCollision = ballX > inner_right_edge;
+			let xCollsion = leftCollision | rightCollision;
+
+			if (topCollision & (~xCollsion))
+			{
+				let _collisionVector = CollisionPoint.getUpwardVector();
+			}
+
+			if (bottomCollision & (~xCollsion))
+			{
+				let _collisionVector = CollisionPoint.getDownwardVector();
+			}
+
+			if (leftCollision)
+			{
+				let _collisionVector = CollisionPoint.getLeftwardVector();
+			}
+
+			if (rightCollision)
+			{
+				let _collisionVector = CollisionPoint.getRightwardVector();
+			}
+		}
+
+		return;
+	}
+
+	method void render()
+	{
+		var int posX;
+		var int posY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		do Screen.setColor(true);
+		do Screen.drawRectangle(posX, 
+			                    posY, 
+			                    posX + _width,
+			                    posY + _height);
+		do Screen.setColor(false);
+		do Screen.drawRectangle(posX + 1,
+			                    posY + 1,
+			                    posX + _width - 1,
+			                    posY + _height - 1);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do _position.dispose();
+		do Memory.deAlloc(this);
+		return;
+	}
+}

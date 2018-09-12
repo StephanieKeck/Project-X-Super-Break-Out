@@ -1,0 +1,297 @@
+
+class VerticalRoundedPaddleController
+{
+	field Point _position;
+
+	field Point _center;
+
+	field int _height;
+	field int _width;
+	field int _radius;
+
+	field boolean _rightFacing;
+
+	field int _stepAmount;
+
+	field boolean _ballCollision;
+	field int _collisionVector;
+
+	field Array _renderPoints;
+	field int _renderPointsCount;
+
+	field Array _collisionPoints;
+	field int _collisionPointsCount;
+
+
+	constructor VerticalRoundedPaddleController new(Point position, boolean faceRight)
+	{
+		var int posX;
+		var int posY;
+
+		let _height = 80;
+		let _width = 10;
+		let _radius = 128;
+
+		let _rightFacing = faceRight;
+
+		let _stepAmount = 4;
+
+		let _ballCollision = false;
+		let _collisionVector = -1;
+
+		let _position = position;
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let _renderPointsCount = 11;
+		let _collisionPointsCount = 6;
+
+		let _renderPoints = Array.new(_renderPointsCount);
+		let _collisionPoints = Array.new(_collisionPointsCount);
+
+		if (faceRight)
+		{
+			let _renderPoints[0] = Point.new(0,0);
+			let _renderPoints[1] = Point.new(4,0);
+			let _renderPoints[2] = Point.new(5,3);
+			let _renderPoints[3] = Point.new(8,15);
+			let _renderPoints[4] = Point.new(9,27);
+			let _renderPoints[5] = Point.new(10,40);
+			let _renderPoints[6] = Point.new(9,53);
+			let _renderPoints[7] = Point.new(8,65);
+			let _renderPoints[8] = Point.new(5,77);
+			let _renderPoints[9] = Point.new(4,80);
+			let _renderPoints[10] = Point.new(0,80);
+
+			let _collisionPoints[0] = CollisionPoint.new(6,9,5);
+			let _collisionPoints[1] = CollisionPoint.new(9,21,3);
+			let _collisionPoints[2] = CollisionPoint.new(10,34,1);
+			let _collisionPoints[3] = CollisionPoint.new(10,46,127);
+			let _collisionPoints[4] = CollisionPoint.new(9,59,125);
+			let _collisionPoints[5] = CollisionPoint.new(6,71,123);
+
+			let _center = Point.new(-118, 40);
+		}
+		else
+		{
+			let _renderPoints[0] = Point.new(0,0);
+			let _renderPoints[1] = Point.new(-4,0);
+			let _renderPoints[2] = Point.new(-5,3);
+			let _renderPoints[3] = Point.new(-8,15);
+			let _renderPoints[4] = Point.new(-9,27);
+			let _renderPoints[5] = Point.new(-10,40);
+			let _renderPoints[6] = Point.new(-9,53);
+			let _renderPoints[7] = Point.new(-8,65);
+			let _renderPoints[8] = Point.new(-5,77);
+			let _renderPoints[9] = Point.new(-4,80);
+			let _renderPoints[10] = Point.new(0,80);
+
+			let _collisionPoints[0] = CollisionPoint.new(-6,9,59);
+			let _collisionPoints[1] = CollisionPoint.new(-9,21,61);
+			let _collisionPoints[2] = CollisionPoint.new(-10,34,63);
+			let _collisionPoints[3] = CollisionPoint.new(-10,46,65);
+			let _collisionPoints[4] = CollisionPoint.new(-9,59,68);
+			let _collisionPoints[5] = CollisionPoint.new(-6,71,70);
+
+			let _center = Point.new(118, 40);
+		}
+
+		return this;
+	}
+
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+	method int getStepAmount() { return _stepAmount; }
+	method int getUpperEdge() 
+	{ 
+		var int posY;
+
+		let posY = _position.getY();
+
+		return posY;
+	}
+	method int getLowerEdge() 
+	{ 
+		var int posY;
+
+		let posY = _position.getY();
+
+		return (posY + _height);
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		let _ballCollision = false;
+
+		do _calculateCollisionWithSelf(ball);
+
+		return;
+	}
+
+
+	method void _calculateCollisionWithSelf(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+		var CollisionPoint cPoint;
+
+		var int distanceToBall;
+		var boolean ballWithinBounds;
+
+		var int ballX;
+		var int ballY;
+		var int posX;
+		var int posY;
+		var int centerX;
+		var int centerY;
+
+		var int threshold;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let ballWithinBounds = _ballWithinBounds(ball);
+
+		if (ballWithinBounds)
+		{
+			let ballX = ballPosition.getX();
+			let ballY = ballPosition.getY();
+			let posX = _position.getX();
+			let posY = _position.getY();
+			let centerX = _center.getX();
+			let centerY = _center.getY();
+
+			let distanceToBall = Point.distanceBetweenPointsByCoordinates(ballX, ballY, centerX + posX, centerY + posY);
+
+			let threshold = 8;
+
+			if ((distanceToBall - ballRadius) < (_radius + threshold))
+			{
+				let _ballCollision = true;
+
+				let cPoint = CollisionPoint.getClosestCollisionPoint(ballPosition, _position, _collisionPoints, _collisionPointsCount);
+
+				let _collisionVector = cPoint.getVector();
+			}
+		}
+
+		return;
+	}
+
+	method boolean _ballWithinBounds(BallController ball)
+	{
+		var Point ballPosition;
+		var int ballRadius;
+
+		var int threshold;
+
+		var int posX;
+		var int posY;
+		var int ballX;
+		var int ballY;
+
+		var int normalized_top_edge;
+		var int normalized_bottom_edge;
+		var int normalized_left_edge;
+		var int normalized_right_edge;
+
+		var boolean ballWithinXBounds;
+		var boolean ballWithinYBounds;
+
+		let ballPosition = ball.getPosition();
+		let ballRadius = ball.getRadius();
+
+		let threshold = 1;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+		let ballX = ballPosition.getX();
+		let ballY = ballPosition.getY();
+
+		let normalized_top_edge = posY - ballRadius - threshold;
+		let normalized_bottom_edge = posY + _height + ballRadius + threshold;
+
+		if (_rightFacing)
+		{
+			let normalized_left_edge = posX - ballRadius - threshold;
+			let normalized_right_edge = posX + _width + ballRadius + threshold;
+		}
+		else
+		{
+			let normalized_left_edge = posX - _width - ballRadius - threshold;
+			let normalized_right_edge = posX + ballRadius + threshold;
+		}
+
+		let ballWithinXBounds = (ballX > normalized_left_edge) & (ballX < normalized_right_edge);
+		let ballWithinYBounds = (ballY > normalized_top_edge) & (ballY < normalized_bottom_edge);
+
+		return ballWithinXBounds & ballWithinYBounds;
+	}
+
+	method void render()
+	{
+		do RenderUtil.drawPointsWithOffset(_position, _renderPoints, _renderPointsCount);
+
+		return;
+	}
+
+	method void moveUp()
+	{
+		var int posX;
+		var int posY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		do _position.updateCoordinates(posX, posY - _stepAmount);
+
+		return;
+	}
+
+	method void moveDown()
+	{
+		var int posX;
+		var int posY;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		do _position.updateCoordinates(posX, posY + _stepAmount);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		var Point p;
+		var CollisionPoint c;
+		var int index;
+
+		do _position.dispose();
+		do _center.dispose();
+
+		let index = 0;
+		while (index < _renderPointsCount)
+		{
+			let p = _renderPoints[index];
+			do p.dispose();
+			let index = index + 1;
+		}
+
+		do _renderPoints.dispose();
+
+		let index = 0;
+		while (index < _collisionPointsCount)
+		{
+			let c = _collisionPoints[index];
+			do c.dispose();
+			let index = index + 1;
+		}
+
+		do _collisionPoints.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

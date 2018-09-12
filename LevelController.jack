@@ -1,0 +1,201 @@
+
+class LevelController
+{
+	field int _currentPoints;
+	field int _blocksRemaining;
+	field boolean _ballLost;
+	field boolean _ballWaitingState;
+	field Point _defaultBallPosition;
+	field int _startVector;
+	//field String _message;
+
+	field BallController _ball;
+	field SectorsController _sectorsController;
+	field BoundaryController _boundaryController;
+
+
+	constructor LevelController new(SectorsController sectorsController, Point defaultBallPosition, int startVector)
+	{
+		
+
+		let _ballWaitingState = true;
+		let _sectorsController = sectorsController;
+		// let _sectorsController = SectorsController.new(Point.new(0,0));
+
+		let _currentPoints = 0;
+		let _blocksRemaining = _sectorsController.getBlocksRemaining();
+		let _ballLost = false;
+		let _defaultBallPosition = defaultBallPosition;
+		let _startVector = startVector;
+		//let _message = "";
+
+		let _ball = BallController.new(Point.new(0,0), 8);
+		do _ball.moveTo(_defaultBallPosition);
+		let _boundaryController = BoundaryController.new(Point.new(0,16));
+
+		return this;
+
+	}
+
+	method boolean ballLost() { return _ballLost; }
+	method int getPoints() { return _currentPoints; }
+	method int getBlocksRemaining() { return _blocksRemaining; }
+	method boolean ballWithinStatsArea() { return StatsUIController.ballWithinStatsArea(_ball); }
+
+	method void update()
+	{
+		var boolean ballCollision;
+		var boolean ballStopped;
+		var boolean ballInBoundary;
+		var int cyclesSinceLastCollision;
+		var int ballDirection;
+		var int normalVector;
+		var int ballVector;
+		var int newVector;
+
+		let _currentPoints = 0;
+		let _ballLost = false;
+		let ballCollision = false;
+
+		let ballStopped = _ball.isStopped();
+		let cyclesSinceLastCollision = _ball.getCyclesSinceLastCollision();
+
+
+		// Ball-waiting state occurs when the level first starts or
+		// after the ball has been lost. The ball snaps back to its
+		// default position above the paddle and waits for the user
+		// to start gameplay again.
+		if (~_ballWaitingState)
+		{
+			if (ballStopped)
+			{
+				do _ball.updateDirection(_startVector);
+				do _ball.start();
+			}
+
+			// Update ball
+			do _ball.update();
+
+			// Update component state w.r.t. ball
+			do _boundaryController.updateBallPosition(_ball);
+			do _sectorsController.updateBallPosition(_ball);
+
+			// Check if ball was lost
+			let _ballLost = _boundaryController.ballLost();
+			if (~_ballLost) { let _ballLost = _sectorsController.ballLost(); }
+
+			// Only proceed if ball was not lost
+			if (~_ballLost)
+			{
+				// Check for ball collision
+				let ballCollision = _boundaryController.ballCollision();
+				if (ballCollision) { let normalVector = _boundaryController.getCollisionVector(); }
+				else // If no collision with boundary, check sectors
+				{
+					let ballCollision = _sectorsController.ballCollision();
+					// If collision within a sector, get relevant data
+					if (ballCollision)
+					{
+						let normalVector = _sectorsController.getCollisionVector();
+
+						do _sectorsController.update();
+
+						let _currentPoints = _sectorsController.getPoints();
+						let _blocksRemaining = _sectorsController.getBlocksRemaining();
+					}
+				}
+
+				// If ball collision, update direction of ball
+				if (ballCollision & (cyclesSinceLastCollision > 4)) 
+				{ 
+					let ballDirection = _ball.getDirection();
+					let ballVector = CollisionPoint.flipVector(ballDirection);
+					let newVector = CollisionPoint.reflectVector(ballVector, normalVector);
+					do _ball.updateDirection(newVector);
+				}
+			}
+			else // If ball lost, reset to ball waiting state
+			{
+				let _ballWaitingState = true;
+				//let _message = "Ball Lost.";
+			}
+		}
+		else
+		{
+			//let _message = "Press any key to begin";
+
+			// Stop ball if it is moving
+			if (~ballStopped) 
+			{ 
+				do _ball.stop();
+				do _ball.moveTo(_defaultBallPosition);
+				do _boundaryController.clear();
+			}
+		}
+
+		let ballInBoundary = _boundaryController.ballInBoundary(_ball);
+		if (ballInBoundary)
+		{
+			do _boundaryController.clear();
+		}
+		do _boundaryController.render();
+
+		do _ball.render();
+
+		return;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		// Don't allow keyboard input while in waiting state
+		if (~(_ballWaitingState))
+		{
+			do _boundaryController.updateKeyBoardInput(key);
+			do _sectorsController.updateKeyBoardInput(key);
+
+			if (key = 82) //Reset ball
+			{
+				let _ballWaitingState = true;
+			}
+		} else
+		{
+			if (~(key = 0)) 
+			{ 
+				let _ballWaitingState = false;
+			}
+		}
+
+		return;
+	}
+
+	method void render()
+	{
+		do _sectorsController.render();
+		do _boundaryController.render();
+		// do MessageDisplayController.render(_message);
+		do _ball.render();
+
+		return;
+	}
+
+	method void clear()
+	{
+		do Screen.setColor(false);
+		do Screen.drawRectangle(0,16,511,255);
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do _defaultBallPosition.dispose();
+		//do _message.dispose();
+		do _ball.dispose();
+		do _sectorsController.dispose();
+		do _boundaryController.dispose();
+
+		do Memory.deAlloc(this);
+
+		return;
+	}
+}

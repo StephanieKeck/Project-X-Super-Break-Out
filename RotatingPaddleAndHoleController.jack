@@ -1,0 +1,112 @@
+
+class RotatingPaddleAndHoleController
+{
+	field Point _position;
+	field int _radius;
+
+	field boolean _ballLost;
+	field boolean _ballCollision;
+	field int _collisionVector;
+	field int _currentPoints;
+
+	field RotatingPaddleController _paddle;
+	field HoleController _hole;
+
+	constructor RotatingPaddleAndHoleController new(Point position, int variant)
+	{
+		var int posX;
+		var int posY;
+
+		let _position = position;
+		let _radius = 50;
+
+		let _ballLost = false;
+		let _ballCollision = false;
+		let _collisionVector = -1;
+		let _currentPoints = 0;
+
+		let posX = _position.getX();
+		let posY = _position.getY();
+
+		let _paddle = RotatingPaddleController.new(Point.new(posX, posY));
+		let _hole = HoleController.new(Point.new(posX, posY), 15);
+
+		return this;
+	}
+
+	method boolean ballLost() { return _ballLost; }
+	method boolean ballCollision() { return _ballCollision; }
+	method int getCollisionVector() { return _collisionVector; }
+	method int getPoints() { return _currentPoints; }
+
+	method void moveTo(Point p)
+	{
+		do _position.updateCoordinatesFromPoint(p);
+		do _paddle.moveTo(p);
+		do _hole.moveTo(p);
+
+		return;
+	}
+
+	method void update()
+	{
+		let _currentPoints = 0;
+
+		if (_ballCollision) { let _currentPoints = 20; }
+
+		return;
+	}
+
+	method void updateBallPosition(BallController ball)
+	{
+		let _ballLost = false;
+		let _ballCollision = false;
+
+		do _hole.updateBallPosition(ball);
+
+		let _ballLost = _hole.ballLost();
+
+		if (~_ballLost)
+		{
+			do _paddle.updateBallPosition(ball);
+
+			let _ballCollision = _paddle.ballCollision();
+
+			if (_ballCollision) { let _collisionVector = _paddle.getCollisionVector(); }
+		}
+
+		return;
+	}
+
+	method void updateKeyBoardInput(char key)
+	{
+		if ((key = 130) | (key = 131))
+		{
+			do _paddle.rotateRight();
+		}
+
+		if ((key = 132) | (key = 133))
+		{
+			do _paddle.rotateLeft();
+		}
+
+		return;
+	}
+
+	method void render()
+	{
+		do _hole.render();
+		do _paddle.render();
+
+		return;
+	}
+
+	method void dispose()
+	{
+		do _position.dispose();
+		do _paddle.dispose();
+		do _hole.dispose();
+
+		return;
+	}
+}
