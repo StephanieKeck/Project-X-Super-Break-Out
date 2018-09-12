@@ -1,4 +1,4 @@
-Stephanie Keck, UIN 526009919
+Stephanie Keck
 CSCE 312 section 506
 Project X, Super Break-Out game
 
