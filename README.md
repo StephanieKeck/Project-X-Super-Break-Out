@@ -2,7 +2,7 @@ Stephanie Keck
 CSCE 312 section 506
 Project X, Super Break-Out game
 
-Note: This project requires the JACK compiler and emulator for the Nand To Tetris Software Suite supplied on nand2tetris.org.
+Note: This project requires the JACK compiler and emulator from the Nand To Tetris Software Suite supplied on nand2tetris.org.
 
 Video of gameplay can be found in the file `Keck_Stephanie_Super_Break_Out.mp4`.
 
